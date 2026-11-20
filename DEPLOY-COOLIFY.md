@@ -35,8 +35,10 @@ Do **not** set `NEXT_PUBLIC_LIVE_WS_MODE=port` on Coolify.
 | `NEXT_PUBLIC_SITE_URL` | recommended | `https://your-domain` |
 | `NEXT_PUBLIC_SUPABASE_URL` | optional | Cloud auth |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | optional | Cloud auth |
-| `NEXT_PUBLIC_ADMIN_EMAIL` | optional | |
-| `NEXT_PUBLIC_ADMIN_EMAILS` | optional | |
+| `NEXT_PUBLIC_ADMIN_EMAIL` | recommended | `admin@fastcourt.eu` |
+| `NEXT_PUBLIC_MASTER_ADMIN_EMAIL` | recommended | `admin@fastcourt.eu` |
+| `NEXT_PUBLIC_ADMIN_EMAILS` | recommended | `admin@fastcourt.eu` |
+| `NEXT_PUBLIC_LOCAL_ADMIN_PASSWORD` | recommended | local master-admin password |
 
 Without Supabase, app runs local/demo mode. Live still works via WebSocket.
 

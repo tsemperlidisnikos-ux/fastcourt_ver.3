@@ -19,6 +19,7 @@ import {
   isPasswordRecoveryLogin,
   safeNextPath,
 } from "@/features/auth/lib/safe-next-path";
+import { localAdminPasswordError } from "@/features/auth/lib/roles";
 import { finalizeAuthSession } from "@/features/auth/lib/session-bootstrap";
 import { upsertProfileForUser } from "@/features/auth/lib/signup";
 import { ensureLibraryReadyForUser, prepareLibrarySessionForUser, resetLibraryOnSignOut } from "@/shared/lib/cloud/library-sync";
@@ -439,6 +440,11 @@ export function LoginForm({
     let redirecting = false;
     try {
       if (!isCloudAuthEnabled()) {
+        const adminPwError = localAdminPasswordError(normalized, passwordValue);
+        if (adminPwError) {
+          setError(adminPwError);
+          return;
+        }
         const session = localDemoSession(normalized);
         const accessError = await completeAuthSession(session);
         if (accessError) setError(accessError);
@@ -530,6 +536,11 @@ export function LoginForm({
     setLoading(true);
     try {
       if (!isCloudAuthEnabled()) {
+        const adminPwError = localAdminPasswordError(normalized, password);
+        if (adminPwError) {
+          setError(adminPwError);
+          return;
+        }
         const session = localDemoSession(normalized);
         const accessError = await completeAuthSession(session);
         if (accessError) setError(accessError);

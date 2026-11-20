@@ -6,6 +6,21 @@ export function isMasterAdminEmail(email: string) {
   return getAdminBootstrapEmails().includes(normalized);
 }
 
+/** Local/demo mode only — master admin password (Coolify without Supabase). */
+export function getLocalAdminPassword() {
+  return (
+    process.env.NEXT_PUBLIC_LOCAL_ADMIN_PASSWORD?.trim() ||
+    "FastCourt-Admin-2026!"
+  );
+}
+
+/** Returns an error message when local master-admin password is wrong. */
+export function localAdminPasswordError(email: string, password: string) {
+  if (!isMasterAdminEmail(email)) return null;
+  if (password === getLocalAdminPassword()) return null;
+  return "Incorrect email or password.";
+}
+
 export function resolveSignupRole(email: string): Role {
   return isMasterAdminEmail(email) ? ROLES.admin : ROLES.coach;
 }
