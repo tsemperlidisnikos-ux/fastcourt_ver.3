@@ -1,0 +1,6 @@
+===== FastCourt start èò® 20/11/2026 22:30:56,87 ===== 
+Folder: C:\fastcourt-next
+C:\Program Files\nodejs\node.exe
+C:\Program Files\nodejs\npm.cmd
+Node v24.15.0
+Running npm.cmd run dev

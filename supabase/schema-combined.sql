@@ -1,0 +1,1357 @@
+﻿-- FastCourt combined schema - run once in Supabase SQL Editor
+-- Generated: 2026-09-12 00:11
+
+-- ---------------------------------------------------------------------------
+-- 001_billing_and_profiles.sql
+-- ---------------------------------------------------------------------------
+-- FastCourt: profiles, license keys, Stripe billing columns, RLS
+-- Run in Supabase SQL editor or via supabase db push
+
+-- ---------------------------------------------------------------------------
+-- Profiles
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email text NOT NULL,
+  display_name text NOT NULL DEFAULT '',
+  role text NOT NULL DEFAULT 'coach' CHECK (role IN ('admin', 'coach', 'team_admin')),
+  access_type text NOT NULL DEFAULT 'trial' CHECK (access_type IN ('trial', 'subscription', 'unlimited')),
+  trial_days integer NOT NULL DEFAULT 7,
+  expires_at timestamptz,
+  organization text,
+  stripe_customer_id text,
+  stripe_subscription_id text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS organization text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS stripe_customer_id text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS stripe_subscription_id text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+
+CREATE INDEX IF NOT EXISTS profiles_email_idx ON public.profiles (lower(email));
+CREATE INDEX IF NOT EXISTS profiles_stripe_customer_idx ON public.profiles (stripe_customer_id)
+  WHERE stripe_customer_id IS NOT NULL;
+
+-- Auto-update updated_at
+CREATE OR REPLACE FUNCTION public.set_profiles_updated_at()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS profiles_set_updated_at ON public.profiles;
+CREATE TRIGGER profiles_set_updated_at
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION public.set_profiles_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- License keys
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.license_keys (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  key_code text NOT NULL UNIQUE,
+  duration_days integer NOT NULL DEFAULT 365 CHECK (duration_days > 0),
+  redeemed_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+  redeemed_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS license_keys_code_idx ON public.license_keys (lower(key_code));
+
+-- ---------------------------------------------------------------------------
+-- redeem_license_key RPC (used by src/lib/auth/license.ts)
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.redeem_license_key(key_code text)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_key public.license_keys%ROWTYPE;
+  v_user_id uuid;
+  v_base timestamptz;
+  v_new_expires timestamptz;
+BEGIN
+  v_user_id := auth.uid();
+  IF v_user_id IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'Sign in required to redeem a license.');
+  END IF;
+
+  IF trim(key_code) = '' THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'Enter a license key.');
+  END IF;
+
+  SELECT * INTO v_key
+  FROM public.license_keys
+  WHERE lower(license_keys.key_code) = lower(trim(redeem_license_key.key_code))
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'Invalid license key.');
+  END IF;
+
+  IF v_key.redeemed_by IS NOT NULL AND v_key.redeemed_by <> v_user_id THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'This key was already used.');
+  END IF;
+
+  SELECT COALESCE(expires_at, now()) INTO v_base
+  FROM public.profiles
+  WHERE id = v_user_id;
+
+  IF v_base IS NULL THEN
+    v_base := now();
+  END IF;
+
+  IF v_base < now() THEN
+    v_base := now();
+  END IF;
+
+  v_new_expires := v_base + (v_key.duration_days || ' days')::interval;
+
+  UPDATE public.license_keys
+  SET redeemed_by = v_user_id,
+      redeemed_at = now()
+  WHERE id = v_key.id
+    AND (redeemed_by IS NULL OR redeemed_by = v_user_id);
+
+  UPDATE public.profiles
+  SET access_type = 'subscription',
+      expires_at = v_new_expires,
+      updated_at = now()
+  WHERE id = v_user_id;
+
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.redeem_license_key(text) TO authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Row level security
+-- ---------------------------------------------------------------------------
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.license_keys ENABLE ROW LEVEL SECURITY;
+
+CREATE OR REPLACE FUNCTION public.is_profile_admin()
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.profiles
+    WHERE id = auth.uid()
+      AND role = 'admin'
+  );
+$$;
+
+REVOKE ALL ON FUNCTION public.is_profile_admin() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.is_profile_admin() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_profile_admin() TO service_role;
+
+-- Profiles: users read/update own row
+DROP POLICY IF EXISTS profiles_select_own ON public.profiles;
+CREATE POLICY profiles_select_own ON public.profiles
+  FOR SELECT
+  USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS profiles_update_own ON public.profiles;
+CREATE POLICY profiles_update_own ON public.profiles
+  FOR UPDATE
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
+
+DROP POLICY IF EXISTS profiles_insert_own ON public.profiles;
+CREATE POLICY profiles_insert_own ON public.profiles
+  FOR INSERT
+  WITH CHECK (auth.uid() = id);
+
+-- Profiles: admins read/update all rows
+DROP POLICY IF EXISTS profiles_select_admin ON public.profiles;
+CREATE POLICY profiles_select_admin ON public.profiles
+  FOR SELECT
+  USING (public.is_profile_admin());
+
+DROP POLICY IF EXISTS profiles_update_admin ON public.profiles;
+CREATE POLICY profiles_update_admin ON public.profiles
+  FOR UPDATE
+  USING (public.is_profile_admin());
+
+-- License keys: no direct client access (RPC only)
+DROP POLICY IF EXISTS license_keys_deny_all ON public.license_keys;
+CREATE POLICY license_keys_deny_all ON public.license_keys
+  FOR ALL
+  USING (false);
+
+
+-- ---------------------------------------------------------------------------
+-- 002_trial_days_default_7.sql
+-- ---------------------------------------------------------------------------
+-- Default coach trial: 7 days (was 14)
+ALTER TABLE public.profiles
+  ALTER COLUMN trial_days SET DEFAULT 7;
+
+
+-- ---------------------------------------------------------------------------
+-- 002_user_settings.sql
+-- ---------------------------------------------------------------------------
+-- FastCourt: per-user settings (appearance, branding, prefs, devices)
+
+CREATE TABLE IF NOT EXISTS public.user_settings (
+  user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  appearance jsonb,
+  pdf_brand jsonb,
+  practice_live jsonb,
+  designer jsonb,
+  notifications jsonb,
+  use_org_branding boolean NOT NULL DEFAULT true,
+  devices jsonb NOT NULL DEFAULT '[]'::jsonb,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE OR REPLACE FUNCTION public.set_user_settings_updated_at()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS user_settings_set_updated_at ON public.user_settings;
+CREATE TRIGGER user_settings_set_updated_at
+  BEFORE UPDATE ON public.user_settings
+  FOR EACH ROW
+  EXECUTE FUNCTION public.set_user_settings_updated_at();
+
+ALTER TABLE public.user_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS user_settings_select_own ON public.user_settings;
+CREATE POLICY user_settings_select_own ON public.user_settings
+  FOR SELECT
+  USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS user_settings_insert_own ON public.user_settings;
+CREATE POLICY user_settings_insert_own ON public.user_settings
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS user_settings_update_own ON public.user_settings;
+CREATE POLICY user_settings_update_own ON public.user_settings
+  FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+
+-- ---------------------------------------------------------------------------
+-- 003_admin_purge_policies.sql
+-- ---------------------------------------------------------------------------
+-- Admin purge: allow master admin to delete other users' profiles and settings
+
+DROP POLICY IF EXISTS profiles_delete_admin ON public.profiles;
+CREATE POLICY profiles_delete_admin ON public.profiles
+  FOR DELETE
+  USING (public.is_profile_admin());
+
+DROP POLICY IF EXISTS user_settings_delete_admin ON public.user_settings;
+CREATE POLICY user_settings_delete_admin ON public.user_settings
+  FOR DELETE
+  USING (public.is_profile_admin());
+
+DROP POLICY IF EXISTS user_settings_select_admin ON public.user_settings;
+CREATE POLICY user_settings_select_admin ON public.user_settings
+  FOR SELECT
+  USING (auth.uid() = user_id OR public.is_profile_admin());
+
+
+-- ---------------------------------------------------------------------------
+-- 004_user_library.sql
+-- ---------------------------------------------------------------------------
+-- FastCourt: per-user library (plays snapshot for cross-device sync)
+
+CREATE TABLE IF NOT EXISTS public.user_library (
+  user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  plays jsonb NOT NULL DEFAULT '[]'::jsonb,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE OR REPLACE FUNCTION public.set_user_library_updated_at()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS user_library_set_updated_at ON public.user_library;
+CREATE TRIGGER user_library_set_updated_at
+  BEFORE UPDATE ON public.user_library
+  FOR EACH ROW
+  EXECUTE FUNCTION public.set_user_library_updated_at();
+
+ALTER TABLE public.user_library ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS user_library_select_own ON public.user_library;
+CREATE POLICY user_library_select_own ON public.user_library
+  FOR SELECT
+  USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS user_library_insert_own ON public.user_library;
+CREATE POLICY user_library_insert_own ON public.user_library
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS user_library_update_own ON public.user_library;
+CREATE POLICY user_library_update_own ON public.user_library
+  FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS user_library_delete_own ON public.user_library;
+CREATE POLICY user_library_delete_own ON public.user_library
+  FOR DELETE
+  USING (auth.uid() = user_id);
+
+
+-- ---------------------------------------------------------------------------
+-- 005_user_library_organizer_meta.sql
+-- ---------------------------------------------------------------------------
+-- FastCourt: organizer meta (playbooks, practice, fields) for cloud library sync
+
+ALTER TABLE public.user_library
+  ADD COLUMN IF NOT EXISTS organizer_meta jsonb NOT NULL DEFAULT '{}'::jsonb;
+
+
+-- ---------------------------------------------------------------------------
+-- 006_user_library_tombstones.sql
+-- ---------------------------------------------------------------------------
+-- FastCourt: deletion tombstones for cross-device library sync
+
+ALTER TABLE public.user_library
+  ADD COLUMN IF NOT EXISTS library_tombstones jsonb NOT NULL DEFAULT '[]'::jsonb;
+
+
+-- ---------------------------------------------------------------------------
+-- 007_org_library_access.sql
+-- ---------------------------------------------------------------------------
+-- FastCourt: org coaches may read/write their team admin's shared library row
+
+CREATE OR REPLACE FUNCTION public.can_access_org_library(library_owner_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT
+    library_owner_id = auth.uid()
+    OR EXISTS (
+      SELECT 1
+      FROM public.profiles member
+      INNER JOIN public.profiles owner ON owner.id = library_owner_id
+      WHERE member.id = auth.uid()
+        AND member.id <> library_owner_id
+        AND owner.role = 'team_admin'
+        AND member.organization IS NOT NULL
+        AND owner.organization IS NOT NULL
+        AND lower(trim(member.organization)) = lower(trim(owner.organization))
+    );
+$$;
+
+DROP POLICY IF EXISTS user_library_select_own ON public.user_library;
+CREATE POLICY user_library_select_own ON public.user_library
+  FOR SELECT
+  USING (public.can_access_org_library(user_id));
+
+DROP POLICY IF EXISTS user_library_insert_own ON public.user_library;
+CREATE POLICY user_library_insert_own ON public.user_library
+  FOR INSERT
+  WITH CHECK (public.can_access_org_library(user_id));
+
+DROP POLICY IF EXISTS user_library_update_own ON public.user_library;
+CREATE POLICY user_library_update_own ON public.user_library
+  FOR UPDATE
+  USING (public.can_access_org_library(user_id))
+  WITH CHECK (public.can_access_org_library(user_id));
+
+DROP POLICY IF EXISTS user_library_delete_own ON public.user_library;
+CREATE POLICY user_library_delete_own ON public.user_library
+  FOR DELETE
+  USING (auth.uid() = user_id);
+
+
+-- ---------------------------------------------------------------------------
+-- 008_fix_profiles_rls_recursion.sql
+-- ---------------------------------------------------------------------------
+-- Fix infinite recursion in profiles RLS (admin policies queried profiles again).
+
+CREATE OR REPLACE FUNCTION public.is_profile_admin()
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.profiles
+    WHERE id = auth.uid()
+      AND role = 'admin'
+  );
+$$;
+
+REVOKE ALL ON FUNCTION public.is_profile_admin() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.is_profile_admin() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_profile_admin() TO service_role;
+
+DROP POLICY IF EXISTS profiles_select_admin ON public.profiles;
+CREATE POLICY profiles_select_admin ON public.profiles
+  FOR SELECT
+  USING (public.is_profile_admin());
+
+DROP POLICY IF EXISTS profiles_update_admin ON public.profiles;
+CREATE POLICY profiles_update_admin ON public.profiles
+  FOR UPDATE
+  USING (public.is_profile_admin());
+
+DROP POLICY IF EXISTS profiles_delete_admin ON public.profiles;
+CREATE POLICY profiles_delete_admin ON public.profiles
+  FOR DELETE
+  USING (public.is_profile_admin());
+
+DROP POLICY IF EXISTS user_settings_delete_admin ON public.user_settings;
+CREATE POLICY user_settings_delete_admin ON public.user_settings
+  FOR DELETE
+  USING (public.is_profile_admin());
+
+DROP POLICY IF EXISTS user_settings_select_admin ON public.user_settings;
+CREATE POLICY user_settings_select_admin ON public.user_settings
+  FOR SELECT
+  USING (auth.uid() = user_id OR public.is_profile_admin());
+
+
+-- ---------------------------------------------------------------------------
+-- 009_game_day_live.sql
+-- ---------------------------------------------------------------------------
+-- FastCourt: cross-device Game Day live category sync (staff share links)
+
+CREATE TABLE IF NOT EXISTS public.game_day_live (
+  plan_id text PRIMARY KEY,
+  sync_token text NOT NULL,
+  active_category_id text NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS game_day_live_token_idx ON public.game_day_live (sync_token);
+
+ALTER TABLE public.game_day_live ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS game_day_live_deny_direct ON public.game_day_live;
+CREATE POLICY game_day_live_deny_direct ON public.game_day_live
+  FOR ALL
+  USING (false);
+
+CREATE OR REPLACE FUNCTION public.set_game_day_live(
+  p_plan_id text,
+  p_sync_token text,
+  p_active_category_id text
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_existing_token text;
+  v_now timestamptz := now();
+BEGIN
+  IF length(trim(p_plan_id)) < 3
+    OR length(trim(p_sync_token)) < 8
+    OR length(trim(p_active_category_id)) < 1 THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_args');
+  END IF;
+
+  SELECT sync_token
+  INTO v_existing_token
+  FROM public.game_day_live
+  WHERE plan_id = trim(p_plan_id);
+
+  IF v_existing_token IS NULL THEN
+    INSERT INTO public.game_day_live (plan_id, sync_token, active_category_id, updated_at)
+    VALUES (trim(p_plan_id), trim(p_sync_token), trim(p_active_category_id), v_now);
+  ELSIF v_existing_token = trim(p_sync_token) THEN
+    UPDATE public.game_day_live
+    SET active_category_id = trim(p_active_category_id),
+        updated_at = v_now
+    WHERE plan_id = trim(p_plan_id);
+  ELSE
+    RETURN jsonb_build_object('ok', false, 'error', 'token_mismatch');
+  END IF;
+
+  RETURN jsonb_build_object(
+    'ok', true,
+    'activeCategoryId', trim(p_active_category_id),
+    'updatedAt', v_now
+  );
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_game_day_live(
+  p_plan_id text,
+  p_sync_token text
+)
+RETURNS jsonb
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT jsonb_build_object(
+    'ok', true,
+    'activeCategoryId', active_category_id,
+    'updatedAt', updated_at
+  )
+  FROM public.game_day_live
+  WHERE plan_id = trim(p_plan_id)
+    AND sync_token = trim(p_sync_token)
+  LIMIT 1;
+$$;
+
+REVOKE ALL ON FUNCTION public.set_game_day_live(text, text, text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.get_game_day_live(text, text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.set_game_day_live(text, text, text) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.get_game_day_live(text, text) TO anon, authenticated;
+
+
+-- ---------------------------------------------------------------------------
+-- 010_team_library_owner.sql
+-- ---------------------------------------------------------------------------
+-- Resolve the shared team library owner for the signed-in coach (SECURITY DEFINER).
+
+CREATE OR REPLACE FUNCTION public.resolve_team_library_owner_id()
+RETURNS uuid
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE(
+    (
+      SELECT owner.id
+      FROM public.profiles member
+      INNER JOIN public.profiles owner
+        ON owner.role = 'team_admin'
+       AND owner.organization IS NOT NULL
+       AND member.organization IS NOT NULL
+       AND lower(trim(member.organization)) = lower(trim(owner.organization))
+      WHERE member.id = auth.uid()
+        AND member.id <> owner.id
+      ORDER BY owner.created_at ASC
+      LIMIT 1
+    ),
+    auth.uid()
+  );
+$$;
+
+REVOKE ALL ON FUNCTION public.resolve_team_library_owner_id() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.resolve_team_library_owner_id() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.resolve_team_library_owner_id() TO service_role;
+
+
+-- ---------------------------------------------------------------------------
+-- 011_team_library_profile_link.sql
+-- ---------------------------------------------------------------------------
+-- Persist team library owner on each profile + server-side linking RPC.
+
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS team_library_owner_id uuid REFERENCES public.profiles (id);
+
+CREATE INDEX IF NOT EXISTS profiles_team_library_owner_idx
+  ON public.profiles (team_library_owner_id)
+  WHERE team_library_owner_id IS NOT NULL;
+
+CREATE OR REPLACE FUNCTION public.lookup_profile_id_by_email(target_email text)
+RETURNS uuid
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT id
+  FROM public.profiles
+  WHERE lower(trim(email)) = lower(trim(target_email))
+  LIMIT 1;
+$$;
+
+REVOKE ALL ON FUNCTION public.lookup_profile_id_by_email(text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.lookup_profile_id_by_email(text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.lookup_profile_id_by_email(text) TO service_role;
+
+CREATE OR REPLACE FUNCTION public.sync_team_library_link(
+  p_org_name text,
+  p_admin_email text DEFAULT NULL,
+  p_member_role text DEFAULT 'coach'
+)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_owner_id uuid;
+  v_org text := nullif(trim(p_org_name), '');
+  v_admin_email text := nullif(lower(trim(coalesce(p_admin_email, ''))), '');
+BEGIN
+  IF v_org IS NULL THEN
+    RETURN auth.uid();
+  END IF;
+
+  IF p_member_role = 'team_admin' THEN
+    UPDATE public.profiles
+    SET
+      organization = v_org,
+      role = 'team_admin',
+      team_library_owner_id = auth.uid(),
+      updated_at = now()
+    WHERE id = auth.uid();
+    RETURN auth.uid();
+  END IF;
+
+  IF v_admin_email IS NOT NULL THEN
+    SELECT id INTO v_owner_id
+    FROM public.profiles
+    WHERE lower(trim(email)) = v_admin_email
+    LIMIT 1;
+  END IF;
+
+  IF v_owner_id IS NULL THEN
+    SELECT id INTO v_owner_id
+    FROM public.profiles
+    WHERE role = 'team_admin'
+      AND organization IS NOT NULL
+      AND lower(trim(organization)) = lower(v_org)
+    ORDER BY created_at ASC
+    LIMIT 1;
+  END IF;
+
+  IF v_owner_id IS NULL THEN
+    SELECT id INTO v_owner_id
+    FROM public.profiles
+    WHERE organization IS NOT NULL
+      AND lower(trim(organization)) = lower(v_org)
+    ORDER BY created_at ASC
+    LIMIT 1;
+  END IF;
+
+  IF v_owner_id IS NULL THEN
+    v_owner_id := auth.uid();
+  END IF;
+
+  UPDATE public.profiles
+  SET
+    organization = v_org,
+    team_library_owner_id = v_owner_id,
+    updated_at = now()
+  WHERE id = auth.uid();
+
+  IF v_owner_id <> auth.uid() THEN
+    UPDATE public.profiles
+    SET
+      organization = v_org,
+      role = 'team_admin',
+      team_library_owner_id = v_owner_id,
+      updated_at = now()
+    WHERE id = v_owner_id;
+  END IF;
+
+  RETURN v_owner_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.sync_team_library_link(text, text, text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.sync_team_library_link(text, text, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.sync_team_library_link(text, text, text) TO service_role;
+
+CREATE OR REPLACE FUNCTION public.resolve_team_library_owner_id()
+RETURNS uuid
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE(
+    (
+      SELECT p.team_library_owner_id
+      FROM public.profiles p
+      WHERE p.id = auth.uid()
+        AND p.team_library_owner_id IS NOT NULL
+    ),
+    (
+      SELECT owner.id
+      FROM public.profiles member
+      INNER JOIN public.profiles owner
+        ON owner.role = 'team_admin'
+       AND owner.organization IS NOT NULL
+       AND member.organization IS NOT NULL
+       AND lower(trim(member.organization)) = lower(trim(owner.organization))
+      WHERE member.id = auth.uid()
+        AND member.id <> owner.id
+      ORDER BY owner.created_at ASC
+      LIMIT 1
+    ),
+    auth.uid()
+  );
+$$;
+
+REVOKE ALL ON FUNCTION public.resolve_team_library_owner_id() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.resolve_team_library_owner_id() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.resolve_team_library_owner_id() TO service_role;
+
+
+-- ---------------------------------------------------------------------------
+-- 012_team_library_rls.sql
+-- ---------------------------------------------------------------------------
+-- Team library RLS: coaches linked via team_library_owner_id may access the shared row.
+
+CREATE OR REPLACE FUNCTION public.can_access_org_library(library_owner_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT
+    library_owner_id = auth.uid()
+    OR EXISTS (
+      SELECT 1
+      FROM public.profiles member
+      WHERE member.id = auth.uid()
+        AND member.team_library_owner_id IS NOT NULL
+        AND member.team_library_owner_id = library_owner_id
+    )
+    OR EXISTS (
+      SELECT 1
+      FROM public.profiles member
+      INNER JOIN public.profiles owner ON owner.id = library_owner_id
+      WHERE member.id = auth.uid()
+        AND member.id <> library_owner_id
+        AND owner.role = 'team_admin'
+        AND member.organization IS NOT NULL
+        AND owner.organization IS NOT NULL
+        AND lower(trim(member.organization)) = lower(trim(owner.organization))
+    );
+$$;
+
+REVOKE ALL ON FUNCTION public.can_access_org_library(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.can_access_org_library(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.can_access_org_library(uuid) TO service_role;
+
+
+-- ---------------------------------------------------------------------------
+-- 013_admin_link_team_library.sql
+-- ---------------------------------------------------------------------------
+-- Service-role helper: link team admin + coach profiles to a shared library owner row.
+
+CREATE OR REPLACE FUNCTION public.admin_link_team_library(
+  p_org_name text,
+  p_admin_email text,
+  p_member_emails text[] DEFAULT '{}'::text[]
+)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_admin_id uuid;
+  v_email text;
+  v_org text := nullif(trim(p_org_name), '');
+BEGIN
+  IF auth.role() IS DISTINCT FROM 'service_role' THEN
+    RAISE EXCEPTION 'admin_link_team_library requires service_role';
+  END IF;
+
+  IF v_org IS NULL THEN
+    RAISE EXCEPTION 'organization name is required';
+  END IF;
+
+  SELECT id
+  INTO v_admin_id
+  FROM public.profiles
+  WHERE lower(trim(email)) = lower(trim(p_admin_email))
+  LIMIT 1;
+
+  IF v_admin_id IS NULL THEN
+    RAISE EXCEPTION 'team admin profile not found for %', p_admin_email;
+  END IF;
+
+  UPDATE public.profiles
+  SET
+    role = 'team_admin',
+    organization = v_org,
+    team_library_owner_id = v_admin_id,
+    updated_at = now()
+  WHERE id = v_admin_id;
+
+  FOREACH v_email IN ARRAY coalesce(p_member_emails, '{}'::text[]) LOOP
+    IF nullif(trim(v_email), '') IS NULL THEN
+      CONTINUE;
+    END IF;
+    IF lower(trim(v_email)) = lower(trim(p_admin_email)) THEN
+      CONTINUE;
+    END IF;
+
+    UPDATE public.profiles
+    SET
+      organization = v_org,
+      team_library_owner_id = v_admin_id,
+      updated_at = now()
+    WHERE lower(trim(email)) = lower(trim(v_email));
+  END LOOP;
+
+  RETURN v_admin_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.admin_link_team_library(text, text, text[]) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.admin_link_team_library(text, text, text[]) TO service_role;
+
+
+-- ---------------------------------------------------------------------------
+-- 014_library_admin_and_team_read.sql
+-- ---------------------------------------------------------------------------
+-- Allow platform admins to read all libraries, and team admins to read
+-- linked coaches' personal library rows (so they can merge into the shared row).
+
+CREATE OR REPLACE FUNCTION public.can_access_org_library(library_owner_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT
+    library_owner_id = auth.uid()
+    OR public.is_profile_admin()
+    OR EXISTS (
+      SELECT 1
+      FROM public.profiles member
+      WHERE member.id = auth.uid()
+        AND member.team_library_owner_id IS NOT NULL
+        AND member.team_library_owner_id = library_owner_id
+    )
+    OR EXISTS (
+      SELECT 1
+      FROM public.profiles member
+      INNER JOIN public.profiles owner ON owner.id = library_owner_id
+      WHERE member.id = auth.uid()
+        AND member.id <> library_owner_id
+        AND owner.role = 'team_admin'
+        AND member.organization IS NOT NULL
+        AND owner.organization IS NOT NULL
+        AND lower(trim(member.organization)) = lower(trim(owner.organization))
+    )
+    OR EXISTS (
+      -- Team admin reading a coach's personal library row
+      SELECT 1
+      FROM public.profiles admin
+      INNER JOIN public.profiles coach ON coach.id = library_owner_id
+      WHERE admin.id = auth.uid()
+        AND admin.role = 'team_admin'
+        AND (
+          coach.team_library_owner_id = admin.id
+          OR (
+            coach.organization IS NOT NULL
+            AND admin.organization IS NOT NULL
+            AND lower(trim(coach.organization)) = lower(trim(admin.organization))
+          )
+        )
+    );
+$$;
+
+REVOKE ALL ON FUNCTION public.can_access_org_library(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.can_access_org_library(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.can_access_org_library(uuid) TO service_role;
+
+
+-- ---------------------------------------------------------------------------
+-- 015_team_admin_link_members.sql
+-- ---------------------------------------------------------------------------
+-- Allow the signed-in team admin to link invited coach profiles to their
+-- shared library owner row (so coach personal libraries become readable/mergeable).
+
+CREATE OR REPLACE FUNCTION public.team_admin_link_member_emails(
+  p_member_emails text[] DEFAULT '{}'::text[],
+  p_org_name text DEFAULT NULL
+)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_admin_id uuid := auth.uid();
+  v_org text;
+  v_email text;
+BEGIN
+  IF v_admin_id IS NULL THEN
+    RAISE EXCEPTION 'not authenticated';
+  END IF;
+
+  SELECT nullif(trim(organization), '') INTO v_org
+  FROM public.profiles
+  WHERE id = v_admin_id;
+
+  v_org := COALESCE(nullif(trim(p_org_name), ''), v_org);
+
+  UPDATE public.profiles
+  SET
+    role = 'team_admin',
+    team_library_owner_id = v_admin_id,
+    organization = COALESCE(v_org, organization),
+    updated_at = now()
+  WHERE id = v_admin_id;
+
+  SELECT nullif(trim(organization), '') INTO v_org
+  FROM public.profiles
+  WHERE id = v_admin_id;
+
+  FOREACH v_email IN ARRAY coalesce(p_member_emails, '{}'::text[]) LOOP
+    IF nullif(trim(v_email), '') IS NULL THEN
+      CONTINUE;
+    END IF;
+
+    UPDATE public.profiles
+    SET
+      organization = COALESCE(v_org, organization),
+      team_library_owner_id = v_admin_id,
+      updated_at = now()
+    WHERE lower(trim(email)) = lower(trim(v_email))
+      AND id <> v_admin_id;
+  END LOOP;
+
+  RETURN v_admin_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.team_admin_link_member_emails(text[], text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.team_admin_link_member_emails(text[], text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.team_admin_link_member_emails(text[], text) TO service_role;
+
+-- List coach profile ids linked to the current team admin (bypasses profiles RLS).
+CREATE OR REPLACE FUNCTION public.list_team_linked_member_ids()
+RETURNS SETOF uuid
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT p.id
+  FROM public.profiles p
+  WHERE p.team_library_owner_id = auth.uid()
+    AND p.id <> auth.uid();
+$$;
+
+REVOKE ALL ON FUNCTION public.list_team_linked_member_ids() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.list_team_linked_member_ids() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.list_team_linked_member_ids() TO service_role;
+
+
+-- ---------------------------------------------------------------------------
+-- 016_harden_team_library_owner.sql
+-- ---------------------------------------------------------------------------
+-- Harden team library owner resolution so platform admins are never
+-- selected as the shared library owner for a team org.
+
+CREATE OR REPLACE FUNCTION public.sync_team_library_link(
+  p_org_name text,
+  p_admin_email text DEFAULT NULL,
+  p_member_role text DEFAULT 'coach'
+)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_owner_id uuid;
+  v_org text := nullif(trim(p_org_name), '');
+  v_admin_email text := nullif(lower(trim(coalesce(p_admin_email, ''))), '');
+BEGIN
+  IF v_org IS NULL THEN
+    RETURN auth.uid();
+  END IF;
+
+  IF p_member_role = 'team_admin' THEN
+    UPDATE public.profiles
+    SET
+      organization = v_org,
+      role = 'team_admin',
+      team_library_owner_id = auth.uid(),
+      updated_at = now()
+    WHERE id = auth.uid()
+      AND coalesce(role, '') IS DISTINCT FROM 'admin';
+    RETURN auth.uid();
+  END IF;
+
+  IF v_admin_email IS NOT NULL THEN
+    SELECT id INTO v_owner_id
+    FROM public.profiles
+    WHERE lower(trim(email)) = v_admin_email
+      AND coalesce(role, '') IS DISTINCT FROM 'admin'
+    LIMIT 1;
+  END IF;
+
+  IF v_owner_id IS NULL THEN
+    SELECT id INTO v_owner_id
+    FROM public.profiles
+    WHERE role = 'team_admin'
+      AND organization IS NOT NULL
+      AND lower(trim(organization)) = lower(v_org)
+    ORDER BY created_at ASC
+    LIMIT 1;
+  END IF;
+
+  IF v_owner_id IS NULL THEN
+    SELECT id INTO v_owner_id
+    FROM public.profiles
+    WHERE organization IS NOT NULL
+      AND lower(trim(organization)) = lower(v_org)
+      AND coalesce(role, '') IS DISTINCT FROM 'admin'
+    ORDER BY created_at ASC
+    LIMIT 1;
+  END IF;
+
+  IF v_owner_id IS NULL THEN
+    v_owner_id := auth.uid();
+  END IF;
+
+  UPDATE public.profiles
+  SET
+    organization = v_org,
+    team_library_owner_id = v_owner_id,
+    updated_at = now()
+  WHERE id = auth.uid();
+
+  IF v_owner_id <> auth.uid() THEN
+    UPDATE public.profiles
+    SET
+      organization = v_org,
+      role = 'team_admin',
+      team_library_owner_id = v_owner_id,
+      updated_at = now()
+    WHERE id = v_owner_id
+      AND coalesce(role, '') IS DISTINCT FROM 'admin';
+  END IF;
+
+  RETURN v_owner_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.sync_team_library_link(text, text, text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.sync_team_library_link(text, text, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.sync_team_library_link(text, text, text) TO service_role;
+
+
+-- ---------------------------------------------------------------------------
+-- 017_platform_settings.sql
+-- ---------------------------------------------------------------------------
+-- Platform-wide layout settings (library frames grid, table columns, designer layout).
+-- Readable by all signed-in users; writable by admins only.
+
+CREATE TABLE IF NOT EXISTS public.platform_settings (
+  id text PRIMARY KEY,
+  layout jsonb NOT NULL DEFAULT '{}'::jsonb,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+INSERT INTO public.platform_settings (id, layout)
+VALUES ('default', '{}'::jsonb)
+ON CONFLICT (id) DO NOTHING;
+
+ALTER TABLE public.platform_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS platform_settings_select_authenticated ON public.platform_settings;
+CREATE POLICY platform_settings_select_authenticated ON public.platform_settings
+  FOR SELECT
+  TO authenticated
+  USING (true);
+
+DROP POLICY IF EXISTS platform_settings_upsert_admin ON public.platform_settings;
+CREATE POLICY platform_settings_insert_admin ON public.platform_settings
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (public.is_profile_admin());
+
+DROP POLICY IF EXISTS platform_settings_update_admin ON public.platform_settings;
+CREATE POLICY platform_settings_update_admin ON public.platform_settings
+  FOR UPDATE
+  TO authenticated
+  USING (public.is_profile_admin())
+  WITH CHECK (public.is_profile_admin());
+
+GRANT SELECT ON public.platform_settings TO authenticated;
+GRANT INSERT, UPDATE ON public.platform_settings TO authenticated;
+GRANT ALL ON public.platform_settings TO service_role;
+
+
+-- ---------------------------------------------------------------------------
+-- 018_profiles_admin_insert.sql
+-- ---------------------------------------------------------------------------
+-- Allow admins to insert/update any profile (needed for upsert & Apply trial).
+
+DROP POLICY IF EXISTS profiles_insert_admin ON public.profiles;
+CREATE POLICY profiles_insert_admin ON public.profiles
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (public.is_profile_admin());
+
+DROP POLICY IF EXISTS profiles_update_admin ON public.profiles;
+CREATE POLICY profiles_update_admin ON public.profiles
+  FOR UPDATE
+  TO authenticated
+  USING (public.is_profile_admin())
+  WITH CHECK (public.is_profile_admin());
+
+
+-- ---------------------------------------------------------------------------
+-- 019_team_organizations.sql
+-- ---------------------------------------------------------------------------
+-- FastCourt: cloud copy of team organizations (branding, seats, members)
+-- Safe if the table already exists from an older/partial schema.
+
+CREATE TABLE IF NOT EXISTS public.team_organizations (
+  id text PRIMARY KEY
+);
+
+ALTER TABLE public.team_organizations
+  ADD COLUMN IF NOT EXISTS name text;
+ALTER TABLE public.team_organizations
+  ADD COLUMN IF NOT EXISTS team_admin_email text;
+ALTER TABLE public.team_organizations
+  ADD COLUMN IF NOT EXISTS team_admin_user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE public.team_organizations
+  ADD COLUMN IF NOT EXISTS payload jsonb;
+ALTER TABLE public.team_organizations
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz;
+
+UPDATE public.team_organizations SET name = coalesce(name, '') WHERE name IS NULL;
+UPDATE public.team_organizations SET team_admin_email = coalesce(team_admin_email, '') WHERE team_admin_email IS NULL;
+UPDATE public.team_organizations SET payload = coalesce(payload, '{}'::jsonb) WHERE payload IS NULL;
+UPDATE public.team_organizations SET updated_at = coalesce(updated_at, now()) WHERE updated_at IS NULL;
+
+ALTER TABLE public.team_organizations ALTER COLUMN name SET DEFAULT '';
+ALTER TABLE public.team_organizations ALTER COLUMN name SET NOT NULL;
+ALTER TABLE public.team_organizations ALTER COLUMN team_admin_email SET DEFAULT '';
+ALTER TABLE public.team_organizations ALTER COLUMN team_admin_email SET NOT NULL;
+ALTER TABLE public.team_organizations ALTER COLUMN payload SET DEFAULT '{}'::jsonb;
+ALTER TABLE public.team_organizations ALTER COLUMN payload SET NOT NULL;
+ALTER TABLE public.team_organizations ALTER COLUMN updated_at SET DEFAULT now();
+ALTER TABLE public.team_organizations ALTER COLUMN updated_at SET NOT NULL;
+
+CREATE INDEX IF NOT EXISTS team_organizations_admin_email_idx
+  ON public.team_organizations (lower(team_admin_email));
+
+CREATE INDEX IF NOT EXISTS team_organizations_admin_user_idx
+  ON public.team_organizations (team_admin_user_id)
+  WHERE team_admin_user_id IS NOT NULL;
+
+CREATE OR REPLACE FUNCTION public.team_org_mentions_email(payload jsonb, email text)
+RETURNS boolean
+LANGUAGE sql
+IMMUTABLE
+AS $$
+  SELECT
+    email IS NOT NULL
+    AND length(trim(email)) > 0
+    AND (
+      EXISTS (
+        SELECT 1
+        FROM jsonb_array_elements(coalesce(payload->'coaches', '[]'::jsonb)) member
+        WHERE lower(trim(member->>'email')) = lower(trim(email))
+      )
+      OR EXISTS (
+        SELECT 1
+        FROM jsonb_array_elements(coalesce(payload->'players', '[]'::jsonb)) member
+        WHERE lower(trim(member->>'email')) = lower(trim(email))
+      )
+    );
+$$;
+
+ALTER TABLE public.team_organizations ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS team_organizations_select ON public.team_organizations;
+CREATE POLICY team_organizations_select ON public.team_organizations
+  FOR SELECT
+  USING (
+    public.is_profile_admin()
+    OR team_admin_user_id = auth.uid()
+    OR lower(team_admin_email) = lower(coalesce(auth.jwt()->>'email', ''))
+    OR public.team_org_mentions_email(payload, coalesce(auth.jwt()->>'email', ''))
+  );
+
+DROP POLICY IF EXISTS team_organizations_insert ON public.team_organizations;
+CREATE POLICY team_organizations_insert ON public.team_organizations
+  FOR INSERT
+  WITH CHECK (
+    public.is_profile_admin()
+    OR team_admin_user_id = auth.uid()
+    OR lower(team_admin_email) = lower(coalesce(auth.jwt()->>'email', ''))
+    OR public.team_org_mentions_email(payload, coalesce(auth.jwt()->>'email', ''))
+  );
+
+DROP POLICY IF EXISTS team_organizations_update ON public.team_organizations;
+CREATE POLICY team_organizations_update ON public.team_organizations
+  FOR UPDATE
+  USING (
+    public.is_profile_admin()
+    OR team_admin_user_id = auth.uid()
+    OR lower(team_admin_email) = lower(coalesce(auth.jwt()->>'email', ''))
+    OR public.team_org_mentions_email(payload, coalesce(auth.jwt()->>'email', ''))
+  )
+  WITH CHECK (
+    public.is_profile_admin()
+    OR team_admin_user_id = auth.uid()
+    OR lower(team_admin_email) = lower(coalesce(auth.jwt()->>'email', ''))
+    OR public.team_org_mentions_email(payload, coalesce(auth.jwt()->>'email', ''))
+  );
+
+DROP POLICY IF EXISTS team_organizations_delete ON public.team_organizations;
+CREATE POLICY team_organizations_delete ON public.team_organizations
+  FOR DELETE
+  USING (
+    public.is_profile_admin()
+    OR team_admin_user_id = auth.uid()
+    OR lower(team_admin_email) = lower(coalesce(auth.jwt()->>'email', ''))
+  );
+
+-- ---------------------------------------------------------------------------
+-- 020_practice_live.sql
+-- ---------------------------------------------------------------------------
+-- FastCourt: cross-device Practice Live sync (share-link staff / bench tablets)
+
+CREATE TABLE IF NOT EXISTS public.practice_live (
+  session_id text PRIMARY KEY,
+  sync_token text NOT NULL,
+  current_index integer NOT NULL DEFAULT 0,
+  completed jsonb NOT NULL DEFAULT '[]'::jsonb,
+  live_call text,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS practice_live_token_idx ON public.practice_live (sync_token);
+
+ALTER TABLE public.practice_live ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS practice_live_deny_direct ON public.practice_live;
+CREATE POLICY practice_live_deny_direct ON public.practice_live
+  FOR ALL
+  USING (false);
+
+CREATE OR REPLACE FUNCTION public.set_practice_live(
+  p_session_id text,
+  p_sync_token text,
+  p_current_index integer,
+  p_completed jsonb,
+  p_live_call text
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_existing_token text;
+  v_now timestamptz := now();
+  v_completed jsonb;
+  v_call text;
+BEGIN
+  IF length(trim(p_session_id)) < 3
+    OR length(trim(p_sync_token)) < 8
+    OR p_current_index IS NULL
+    OR p_current_index < 0 THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'invalid_args');
+  END IF;
+
+  v_completed := CASE
+    WHEN jsonb_typeof(coalesce(p_completed, '[]'::jsonb)) = 'array' THEN coalesce(p_completed, '[]'::jsonb)
+    ELSE '[]'::jsonb
+  END;
+  v_call := nullif(trim(coalesce(p_live_call, '')), '');
+
+  SELECT sync_token
+  INTO v_existing_token
+  FROM public.practice_live
+  WHERE session_id = trim(p_session_id);
+
+  IF v_existing_token IS NULL THEN
+    INSERT INTO public.practice_live (
+      session_id, sync_token, current_index, completed, live_call, updated_at
+    )
+    VALUES (
+      trim(p_session_id), trim(p_sync_token), p_current_index, v_completed, v_call, v_now
+    );
+  ELSIF v_existing_token = trim(p_sync_token) THEN
+    UPDATE public.practice_live
+    SET current_index = p_current_index,
+        completed = v_completed,
+        live_call = v_call,
+        updated_at = v_now
+    WHERE session_id = trim(p_session_id);
+  ELSE
+    RETURN jsonb_build_object('ok', false, 'error', 'token_mismatch');
+  END IF;
+
+  RETURN jsonb_build_object(
+    'ok', true,
+    'currentIndex', p_current_index,
+    'completed', v_completed,
+    'liveCall', v_call,
+    'updatedAt', v_now
+  );
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_practice_live(
+  p_session_id text,
+  p_sync_token text
+)
+RETURNS jsonb
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT jsonb_build_object(
+    'ok', true,
+    'currentIndex', current_index,
+    'completed', completed,
+    'liveCall', live_call,
+    'updatedAt', updated_at
+  )
+  FROM public.practice_live
+  WHERE session_id = trim(p_session_id)
+    AND sync_token = trim(p_sync_token)
+  LIMIT 1;
+$$;
+
+REVOKE ALL ON FUNCTION public.set_practice_live(text, text, integer, jsonb, text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.get_practice_live(text, text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.set_practice_live(text, text, integer, jsonb, text) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.get_practice_live(text, text) TO anon, authenticated;
+
+
+

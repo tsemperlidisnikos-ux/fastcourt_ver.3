@@ -1,0 +1,67 @@
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
+import {
+  applySafeNextPath,
+  isLoginSignedOut,
+  isPasswordRecoveryLogin,
+} from "@/lib/auth/safe-next-path";
+import { getSupabaseAnonKey, getSupabaseUrl, isCloudConfigured } from "@/lib/supabase/env";
+
+export async function updateSession(request: NextRequest) {
+  let response = NextResponse.next({ request });
+
+  if (!isCloudConfigured()) {
+    return response;
+  }
+
+  const supabase = createServerClient(getSupabaseUrl(), getSupabaseAnonKey(), {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => {
+          request.cookies.set(name, value);
+        });
+        response = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) => {
+          response.cookies.set(name, value, options);
+        });
+      },
+    },
+  });
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const path = request.nextUrl.pathname;
+
+  if (path === "/login" && isLoginSignedOut(request.nextUrl.searchParams)) {
+    await supabase.auth.signOut();
+    return response;
+  }
+
+  const isProtected =
+    path.startsWith("/library") ||
+    path.startsWith("/designer") ||
+    path.startsWith("/settings");
+
+  if (!user && isProtected) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    loginUrl.searchParams.set("next", path);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  if (user && path === "/login") {
+    if (isPasswordRecoveryLogin(path, request.nextUrl.searchParams.get("recovery"))) {
+      return response;
+    }
+    const redirectUrl = request.nextUrl.clone();
+    applySafeNextPath(redirectUrl, request.nextUrl.searchParams.get("next"));
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  return response;
+}

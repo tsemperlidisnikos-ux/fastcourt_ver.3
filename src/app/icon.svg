@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" role="img" aria-label="FastCourt">
+  <rect width="128" height="128" fill="#000000"/>
+  <circle cx="64" cy="64" r="48" fill="#FF914D"/>
+  <!-- Stylized basketball seams / FC mark -->
+  <path
+    d="M64 16c-26.5 0-48 21.5-48 48s21.5 48 48 48 48-21.5 48-48-21.5-48-48-48z"
+    stroke="#E07A30"
+    stroke-width="2"
+    fill="none"
+    opacity="0.35"
+  />
+  <path
+    d="M30 44c18 8 32 28 34 52"
+    stroke="#000000"
+    stroke-width="9"
+    stroke-linecap="round"
+    fill="none"
+  />
+  <path
+    d="M98 44c-18 8-32 28-34 52"
+    stroke="#000000"
+    stroke-width="9"
+    stroke-linecap="round"
+    fill="none"
+  />
+  <path
+    d="M40 36c10-6 24-10 36-8 12 2 22 8 30 16"
+    stroke="#000000"
+    stroke-width="9"
+    stroke-linecap="round"
+    fill="none"
+  />
+  <path
+    d="M36 78h56"
+    stroke="#000000"
+    stroke-width="9"
+    stroke-linecap="round"
+  />
+</svg>

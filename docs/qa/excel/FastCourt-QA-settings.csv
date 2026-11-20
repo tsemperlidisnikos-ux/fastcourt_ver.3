@@ -1,0 +1,13 @@
+﻿Module,Section,Check ID,Priority,Check Item,Steps,Expected Result,Pass (Y/N/NA),Notes,Tester,Date,Environment
+Settings & Admin,Coach Settings,SET-01,P1,Profile name/email update,,Saves,,,,,
+Settings & Admin,Coach Settings,SET-02,P1,"PDF branding (logo, footer)",,Appears on print exports,,,,,
+Settings & Admin,Coach Settings,SET-03,P1,Library JSON export/import,,Backup restores plays,,,,,
+Settings & Admin,Coach Settings,SET-04,P0,Cloud sync library (cloud user),,"Merge stats, no data loss",,,,,
+Settings & Admin,Coach Settings,SET-05,P1,Devices list vs limit,,Accurate device count,,,,,
+Settings & Admin,Admin,SET-10,P2,Library nav module toggle,Disable Film Room,"Tab hidden, /film-room redirects",,,,,
+Settings & Admin,Admin,SET-11,P2,User role management,,Role change applies,,,,,
+Settings & Admin,Admin,SET-12,P2,Org seats and invites,,Coach can join org,,,,,
+Settings & Admin,Admin,SET-13,P0,Apply trial on user (All users),Set trial days → Apply trial → Apply,No RLS Cloud sync error; expiresAt updates,,,,,
+Settings & Admin,Admin,SET-14,P0,Appearance frames Columns Apply for all coaches,Columns=2 → Apply → login as coach,Coach preview uses 2 columns,,,,,
+Settings & Admin,Admin,SET-15,P1,App logo upload / clear to default,,Custom logo shows; Clear restores default orange logo,,,,,
+Settings & Admin,Admin,SET-16,P1,Billing prices display,,€99 / €10 / club seats match config,,,,,
