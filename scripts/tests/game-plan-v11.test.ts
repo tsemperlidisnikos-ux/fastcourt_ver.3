@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
-import { suggestPlaysForGamePlanCategory } from "../../src/lib/game-plan/suggest-plays";
+import { suggestPlaysForGamePlanCategory } from "../../src/features/game-plan/lib/suggest-plays";
 import {
   buildPracticeSessionFromGamePlan,
   computePrepPracticeDate,
-} from "../../src/lib/game-plan/prep-practice";
-import type { GamePlan } from "../../src/types/library-meta";
-import type { StoredPlay } from "../../src/types/library";
+} from "../../src/features/game-plan/lib/prep-practice";
+import type { GamePlan } from "../../src/features/library/model/library-meta";
+import type { StoredPlay } from "../../src/features/library/model/library";
 
 const now = "2026-06-30T12:00:00.000Z";
 

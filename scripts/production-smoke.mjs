@@ -31,9 +31,9 @@ function main() {
   console.log("=== FastCourt Production Smoke ===\n");
 
   const requiredSources = [
-    "src/lib/auth/safe-next-path.ts",
-    "src/lib/cloud/library-owner.ts",
-    "src/lib/cloud/library-sync.ts",
+    "src/features/auth/lib/safe-next-path.ts",
+    "src/shared/lib/cloud/library-owner.ts",
+    "src/shared/lib/cloud/library-sync.ts",
     "supabase/migrations/010_team_library_owner.sql",
     "supabase/migrations/011_team_library_profile_link.sql",
     "supabase/migrations/012_team_library_rls.sql",
@@ -77,7 +77,7 @@ function main() {
   );
   record("critical unit tests", unit.status === 0);
 
-  const playbankPlaceholder = fileExists("src/lib/playbank/.gitkeep");
+  const playbankPlaceholder = fileExists("src/features/playbank/lib/.gitkeep");
   record(
     "PlayBank placeholder tracked",
     true,

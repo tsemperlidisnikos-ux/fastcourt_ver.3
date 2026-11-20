@@ -4,7 +4,7 @@ import {
   COUNTER_LIBRARY_SEED_IDS,
   COUNTER_LIBRARY_SEED_PLAYS,
   COUNTER_LIBRARY_SEED_SPECS,
-} from "../../src/lib/library/starter-plays/seed-counter-library.ts";
+} from "../../src/features/library/lib/starter-plays/seed-counter-library.ts";
 
 test("counter library seed has 15 unique plays", () => {
   assert.equal(COUNTER_LIBRARY_SEED_IDS.length, 15);

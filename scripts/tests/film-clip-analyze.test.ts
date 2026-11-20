@@ -4,13 +4,13 @@ import {
   buildFilmClipAnalyzePrompt,
   parseCoachingRecommendations,
   parseFilmClipAnalysisPayload,
-} from "../../src/lib/film-room/film-clip-analyze-prompt.ts";
-import { formatCoachingForScoutingNotes } from "../../src/lib/film-room/film-coaching-format.ts";
+} from "../../src/features/film-room/lib/film-clip-analyze-prompt.ts";
+import { formatCoachingForScoutingNotes } from "../../src/features/film-room/lib/film-coaching-format.ts";
 import {
   allCoachingCueKeys,
   coachingCueKey,
   filterCoachingBySelectedKeys,
-} from "../../src/lib/film-room/film-coaching-format.ts";
+} from "../../src/features/film-room/lib/film-coaching-format.ts";
 
 describe("film clip analyze", () => {
   it("builds prompt with timestamp and title", () => {

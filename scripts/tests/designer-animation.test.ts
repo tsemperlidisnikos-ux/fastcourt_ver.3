@@ -5,12 +5,12 @@ import {
   computeAnimStepState,
   computeFrameObjectsAfterSteps,
   getPlaybackActionIds,
-} from "@/lib/designer/animation-engine";
+} from "@/features/designer/lib/animation-engine";
 import {
   getAnimationExportDurationMs,
   playHasExportableAnimation,
   samplePlayAnimationAt,
-} from "@/lib/designer/animation-export";
+} from "@/features/designer/lib/animation-export";
 import { makeAction, makeFrame, offense } from "./helpers";
 
 describe("animation engine", () => {
@@ -103,7 +103,7 @@ describe("animation engine", () => {
 describe("free curve peak", () => {
   it("cut curve passes through dragged peak at t=0.5", async () => {
     const { buildActionCurveRenderPoints, pointAlongNormPolyline } = await import(
-      "@/lib/designer/action-geometry"
+      "@/features/designer/lib/action-geometry"
     );
     const action = {
       type: "cut" as const,

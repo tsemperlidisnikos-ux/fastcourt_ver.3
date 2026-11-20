@@ -5,15 +5,15 @@ import {
   applyOrganizationAccess,
   findOrganizationMembership,
   isOrganizationSubscriptionActive,
-} from "../../src/lib/auth/org-access.ts";
+} from "../../src/features/auth/lib/org-access.ts";
 import {
   loadTeamOrganizations,
   newOrgMember,
   newOrganization,
   saveTeamOrganizations,
-} from "../../src/lib/auth/team-organizations.ts";
-import type { SessionUser } from "../../src/types/auth.ts";
-import { ROLES } from "../../src/lib/config.ts";
+} from "../../src/features/auth/lib/team-organizations.ts";
+import type { SessionUser } from "../../src/features/auth/model/auth.ts";
+import { ROLES } from "../../src/shared/lib/config.ts";
 
 const STORAGE_KEY = "fastcourt_team_orgs_v1";
 

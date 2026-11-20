@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import {
   canShowLibraryCreatedByColumn,
   resolvePlayCreatorLabel,
-} from "../../src/lib/library/play-creator-label";
-import type { SessionUser } from "../../src/types/auth";
+} from "../../src/features/library/lib/play-creator-label";
+import type { SessionUser } from "../../src/features/auth/model/auth";
 
 const coach: SessionUser = {
   id: "coach-1",

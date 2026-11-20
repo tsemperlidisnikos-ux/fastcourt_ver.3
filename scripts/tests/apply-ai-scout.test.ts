@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createGamePlanDraft } from "../../src/lib/game-plan/game-plan-items.ts";
-import { buildAiScoutGamePlanPatch } from "../../src/lib/film-room/apply-ai-scout-to-game-plan.ts";
-import { coachingCueKey } from "../../src/lib/film-room/film-coaching-format.ts";
-import type { StoredPlay } from "../../src/types/library.ts";
+import { createGamePlanDraft } from "../../src/features/game-plan/lib/game-plan-items.ts";
+import { buildAiScoutGamePlanPatch } from "../../src/features/film-room/lib/apply-ai-scout-to-game-plan.ts";
+import { coachingCueKey } from "../../src/features/film-room/lib/film-coaching-format.ts";
+import type { StoredPlay } from "../../src/features/library/model/library.ts";
 
 function stubPlay(id: string, title: string, tags: string[] = []): StoredPlay {
   return {

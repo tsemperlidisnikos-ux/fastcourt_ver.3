@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import "@/styles/welcome.css";
-import { LoginForm } from "@/components/auth/LoginForm";
+import "@/shared/styles/welcome.css";
+import { LoginForm } from "@/features/auth/ui/LoginForm";
 
 /** Match request query on the server so LoginForm hydrates with the same auth mode/fields. */
 export const dynamic = "force-dynamic";

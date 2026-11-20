@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import {
   actionToNormPoints,
   buildDribblePoints,
-} from "@/lib/designer/action-geometry";
+} from "@/features/designer/lib/action-geometry";
 import { makeAction } from "./helpers";
 
 describe("dribble geometry", () => {

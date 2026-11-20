@@ -4,15 +4,15 @@ import {
   buildSubscriptionPatch,
   updateProfileBillingByCustomerId,
   updateProfileBillingByUserId,
-} from "@/lib/billing/stripe-profile";
-import { subscriptionPeriodEndUnix, invoiceSubscriptionId } from "@/lib/billing/stripe-access";
-import { createAdminClient } from "@/lib/supabase/admin";
+} from "@/features/billing/lib/stripe-profile";
+import { subscriptionPeriodEndUnix, invoiceSubscriptionId } from "@/features/billing/lib/stripe-access";
+import { createAdminClient } from "@/shared/lib/supabase/admin";
 import {
   getStripeSecretKey,
   getStripeWebhookSecret,
   isServiceRoleConfigured,
   isStripeConfigured,
-} from "@/lib/supabase/env";
+} from "@/shared/lib/supabase/env";
 
 export const runtime = "nodejs";
 

@@ -4,14 +4,14 @@ import {
   computeFrameTimes,
   FILM_CLIP_ANALYZE_FRAME_COUNT,
   FILM_CLIP_ANALYZE_WINDOW_SEC,
-} from "../../src/lib/film-room/capture-video-frames.ts";
+} from "../../src/features/film-room/lib/capture-video-frames.ts";
 import {
   formatFilmEventsForPrompt,
   normalizeFilmAnalyzeEvents,
   selectFilmEventsForAnalyze,
-} from "../../src/lib/film-room/film-event-tags.ts";
-import { normalizeFilmRoomSession } from "../../src/lib/film-room/film-room-session.ts";
-import { buildFilmClipAnalyzePrompt } from "../../src/lib/film-room/film-clip-analyze-prompt.ts";
+} from "../../src/features/film-room/lib/film-event-tags.ts";
+import { normalizeFilmRoomSession } from "../../src/features/film-room/lib/film-room-session.ts";
+import { buildFilmClipAnalyzePrompt } from "../../src/features/film-room/lib/film-clip-analyze-prompt.ts";
 
 describe("film event tags (Level A)", () => {
   it("normalizes legacy sessions without events", () => {
@@ -87,7 +87,7 @@ describe("film analyze context", () => {
       formatFilmAnalyzeTagsSummary,
       formatFrameSequenceForPrompt,
       buildFilmAnalyzeContext,
-    } = await import("../../src/lib/film-room/film-analyze-context.ts");
+    } = await import("../../src/features/film-room/lib/film-analyze-context.ts");
     const line = formatFilmAnalyzeSourceLine({
       frameCount: 10,
       frameTimes: [49, 49.22, 49.44, 49.67, 49.89, 50.11, 50.33, 50.56, 50.78, 51],
@@ -108,7 +108,7 @@ describe("film analyze context", () => {
 
   it("merges coach tags into scouting notes", async () => {
     const { mergeCoachTagsIntoScoutingNotes } = await import(
-      "../../src/lib/film-room/film-event-tags.ts"
+      "../../src/features/film-room/lib/film-event-tags.ts"
     );
     const merged = mergeCoachTagsIntoScoutingNotes(
       "Existing.",

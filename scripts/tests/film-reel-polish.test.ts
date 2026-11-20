@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { buildStandaloneReelHtml } from "../../src/lib/film-room/film-reel-html-export.ts";
-import { buildFilmScoutPrintModelFromSession } from "../../src/lib/film-room/film-scout-print-model.ts";
-import { createFilmBookmark } from "../../src/lib/film-room/film-room-bookmarks.ts";
+import { buildStandaloneReelHtml } from "../../src/features/film-room/lib/film-reel-html-export.ts";
+import { buildFilmScoutPrintModelFromSession } from "../../src/features/film-room/lib/film-scout-print-model.ts";
+import { createFilmBookmark } from "../../src/features/film-room/lib/film-room-bookmarks.ts";
 
 describe("film-reel-polish", () => {
   it("builds standalone reel html", () => {

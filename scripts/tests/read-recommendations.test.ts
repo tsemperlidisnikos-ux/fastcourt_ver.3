@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { buildPracticeSessionFromGamePlan } from "../../src/lib/game-plan/prep-practice.ts";
+import { buildPracticeSessionFromGamePlan } from "../../src/features/game-plan/lib/prep-practice.ts";
 import {
   buildPostGameReadOutcomeNotes,
   buildPrepReadRecommendations,
@@ -8,9 +8,9 @@ import {
   countPrepReadBlocks,
   createPrepReadPracticeItems,
   mergePostGameNotes,
-} from "../../src/lib/game-plan/read-recommendations.ts";
-import type { GamePlan, PracticeSession } from "../../src/types/library-meta.ts";
-import type { StoredPlay } from "../../src/types/library.ts";
+} from "../../src/features/game-plan/lib/read-recommendations.ts";
+import type { GamePlan, PracticeSession } from "../../src/features/library/model/library-meta.ts";
+import type { StoredPlay } from "../../src/features/library/model/library.ts";
 
 const now = "2026-06-30T12:00:00.000Z";
 

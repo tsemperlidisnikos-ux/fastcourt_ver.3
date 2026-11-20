@@ -4,15 +4,15 @@ import {
   buildOpponentReadRollup,
   filterOpponentPracticeSessions,
   sessionMatchesOpponent,
-} from "../../src/lib/game-plan/opponent-read-rollup.ts";
+} from "../../src/features/game-plan/lib/opponent-read-rollup.ts";
 import {
   buildReadSuccessLookup,
   lookupReadSuccessPct,
-} from "../../src/lib/practice/read-success-by-call.ts";
-import { buildReadPlayerAttribution } from "../../src/lib/practice/read-player-attribution.ts";
-import { COACH_SEASON_TREND_SESSIONS } from "../../src/lib/coach/coach-dashboard.ts";
-import { buildPracticeReadTrend } from "../../src/lib/practice/read-success-scorecard.ts";
-import type { GamePlan, PracticeSession } from "../../src/types/library-meta.ts";
+} from "../../src/features/practice/lib/read-success-by-call.ts";
+import { buildReadPlayerAttribution } from "../../src/features/practice/lib/read-player-attribution.ts";
+import { COACH_SEASON_TREND_SESSIONS } from "../../src/features/game-plan/lib/coach/coach-dashboard.ts";
+import { buildPracticeReadTrend } from "../../src/features/practice/lib/read-success-scorecard.ts";
+import type { GamePlan, PracticeSession } from "../../src/features/library/model/library-meta.ts";
 
 const basePlan: GamePlan = {
   id: "gp1",

@@ -4,7 +4,7 @@ import {
   ballHolderIdsAtFrameStart,
   frameObjectsForDesignerThumbnail,
   framesForDesignerThumbnails,
-} from "@/lib/designer/thumbnail-objects";
+} from "@/features/designer/lib/thumbnail-objects";
 import { makeAction, makeFrame, offense } from "./helpers";
 
 describe("thumbnail ball possession", () => {

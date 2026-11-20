@@ -37,18 +37,18 @@ describe("app routes & entry points", () => {
 
 describe("core modules & stores", () => {
   const required = [
-    "src/stores/designer-store.ts",
-    "src/stores/library-store.ts",
-    "src/stores/auth-store.ts",
-    "src/stores/settings-store.ts",
-    "src/lib/designer/frame-propagation.ts",
-    "src/lib/designer/action-propagation.ts",
-    "src/lib/designer/player-edge-snap.ts",
-    "src/lib/supabase/env.ts",
-    "src/lib/supabase/client.ts",
-    "src/components/designer/DesignerScreen.tsx",
-    "src/components/library/LibraryScreen.tsx",
-    "src/components/auth/LoginForm.tsx",
+    "src/features/designer/model/designer-store.ts",
+    "src/features/library/model/library-store.ts",
+    "src/features/auth/model/auth-store.ts",
+    "src/features/settings/model/settings-store.ts",
+    "src/features/designer/lib/frame-propagation.ts",
+    "src/features/designer/lib/action-propagation.ts",
+    "src/features/designer/lib/player-edge-snap.ts",
+    "src/shared/lib/supabase/env.ts",
+    "src/shared/lib/supabase/client.ts",
+    "src/features/designer/ui/DesignerScreen.tsx",
+    "src/features/library/ui/LibraryScreen.tsx",
+    "src/features/auth/ui/LoginForm.tsx",
   ];
 
   for (const file of required) {
@@ -61,7 +61,7 @@ describe("core modules & stores", () => {
 describe("library tabs wiring", () => {
   it("PlayBankView is imported in LibraryScreen", () => {
     const src = fs.readFileSync(
-      path.join(ROOT, "src/components/library/LibraryScreen.tsx"),
+      path.join(ROOT, "src/features/library/ui/LibraryScreen.tsx"),
       "utf8",
     );
     assert.match(src, /PlayBankView/);
@@ -75,7 +75,7 @@ describe("library tabs wiring", () => {
 
   it("PlayersView is imported in LibraryScreen", () => {
     const src = fs.readFileSync(
-      path.join(ROOT, "src/components/library/LibraryScreen.tsx"),
+      path.join(ROOT, "src/features/library/ui/LibraryScreen.tsx"),
       "utf8",
     );
     assert.match(src, /PlayersView/);

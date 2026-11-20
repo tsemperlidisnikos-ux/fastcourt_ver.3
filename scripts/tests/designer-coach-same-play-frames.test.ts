@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { buildSamePlayFrameAlternatives } from "../../src/lib/designer/designer-coach-same-play-frames";
-import type { DesignerCoachPlayContext } from "../../src/lib/designer/analyze-play-locally";
+import { buildSamePlayFrameAlternatives } from "../../src/features/designer/lib/designer-coach-same-play-frames";
+import type { DesignerCoachPlayContext } from "../../src/features/designer/lib/analyze-play-locally";
 
 const play: DesignerCoachPlayContext = {
   id: "play-1",

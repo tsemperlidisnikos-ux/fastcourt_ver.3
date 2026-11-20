@@ -1,9 +1,9 @@
-import "@/styles/fd-ui.css";
-import "@/styles/fc-designer-base.css";
-import "@/styles/fastdraw-editor-ui.css";
-import "@/styles/designer-ui-v240.css";
-import "@/styles/designer-coach.css";
-import "@/styles/fc-modern-designer.css";
+import "@/shared/styles/fd-ui.css";
+import "@/features/designer/styles/fc-designer-base.css";
+import "@/features/designer/styles/fastdraw-editor-ui.css";
+import "@/features/designer/styles/designer-ui-v240.css";
+import "@/features/designer/styles/designer-coach.css";
+import "@/features/designer/styles/fc-modern-designer.css";
 
 export default function DesignerLayout({
   children,

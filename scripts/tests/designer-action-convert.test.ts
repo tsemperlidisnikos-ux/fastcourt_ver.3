@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { convertActionType } from "@/lib/designer/action-convert";
+import { convertActionType } from "@/features/designer/lib/action-convert";
 import { makeAction } from "./helpers";
 
 describe("convertActionType", () => {

@@ -6,11 +6,11 @@ import {
   formatFilmTimestamp,
   parseFilmRoomDeepLink,
   filmScoutNoteFromSession,
-} from "../../src/lib/film-room/film-game-plan-link.ts";
+} from "../../src/features/film-room/lib/film-game-plan-link.ts";
 import {
   createFilmLinkedTendency,
   normalizeOpponentTendencies,
-} from "../../src/lib/game-plan/opponent-board.ts";
+} from "../../src/features/game-plan/lib/opponent-board.ts";
 
 describe("film game plan link", () => {
   it("formats timestamps for display", () => {

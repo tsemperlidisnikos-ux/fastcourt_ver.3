@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { ROLES } from "../../src/lib/config.ts";
+import { ROLES } from "../../src/shared/lib/config.ts";
 import {
   partitionOrganizationsForPurge,
   partitionPlaysForPurge,
   playShouldBeRemoved,
-} from "../../src/lib/admin/purge-application-data.ts";
-import type { AdminUserRecord } from "../../src/types/admin-user.ts";
-import type { StoredPlay } from "../../src/types/library.ts";
+} from "../../src/features/settings/lib/admin/purge-application-data.ts";
+import type { AdminUserRecord } from "../../src/features/auth/model/admin-user.ts";
+import type { StoredPlay } from "../../src/features/library/model/library.ts";
 
 const admin: AdminUserRecord = {
   id: "admin-1",

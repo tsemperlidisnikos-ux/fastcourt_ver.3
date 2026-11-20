@@ -3,9 +3,9 @@ import {
   buildGameDayPatch,
   createGameDaySyncToken,
   ensureGameDaySyncToken,
-} from "../../src/lib/game-plan/game-day-live";
-import { encodeGameDayPayload } from "../../src/lib/share/share-link";
-import type { GamePlan } from "../../src/types/library-meta";
+} from "../../src/features/game-plan/lib/game-day-live";
+import { encodeGameDayPayload } from "../../src/features/share/lib/share-link";
+import type { GamePlan } from "../../src/features/library/model/library-meta";
 
 const plan: GamePlan = {
   id: "gp_live_1",

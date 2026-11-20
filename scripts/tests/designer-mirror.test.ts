@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { mirrorFrameHorizontal, mirrorPlayHorizontal } from "@/lib/designer/mirror-frame";
-import { createBlankPlay } from "@/lib/designer/play-factory";
+import { mirrorFrameHorizontal, mirrorPlayHorizontal } from "@/features/designer/lib/mirror-frame";
+import { createBlankPlay } from "@/features/designer/lib/play-factory";
 import { makeAction, makeFrame, offense } from "./helpers";
 
 describe("mirror frame / play", () => {

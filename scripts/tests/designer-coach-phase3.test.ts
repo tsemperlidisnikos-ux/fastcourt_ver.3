@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
-import { parseAiCoachApplyBundles } from "../../src/lib/designer/designer-coach-ai-apply";
-import { buildCoachPreviewGhosts } from "../../src/lib/designer/designer-coach-preview";
-import type { DesignerFrame } from "../../src/types/designer";
+import { parseAiCoachApplyBundles } from "../../src/features/designer/lib/designer-coach-ai-apply";
+import { buildCoachPreviewGhosts } from "../../src/features/designer/lib/designer-coach-preview";
+import type { DesignerFrame } from "../../src/features/designer/model/designer";
 
 const frame: DesignerFrame = {
   id: "f1",

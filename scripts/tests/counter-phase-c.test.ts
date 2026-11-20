@@ -1,17 +1,17 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildCounterSuccessModel } from "../../src/lib/coach/counter-success.ts";
+import { buildCounterSuccessModel } from "../../src/features/game-plan/lib/coach/counter-success.ts";
 import {
   createCounterPracticeItems,
   formatCounterPracticeCall,
   isCounterPracticeItem,
-} from "../../src/lib/practice/counter-practice.ts";
+} from "../../src/features/practice/lib/counter-practice.ts";
 import {
   buildReadSuccessLookup,
   lookupCounterSuccessPct,
-} from "../../src/lib/practice/read-success-by-call.ts";
-import type { FilmClipCounterSuggestion } from "../../src/lib/film-room/film-clip-analyze-types.ts";
-import type { GamePlan, PracticeSession } from "../../src/types/library-meta.ts";
+} from "../../src/features/practice/lib/read-success-by-call.ts";
+import type { FilmClipCounterSuggestion } from "../../src/features/film-room/lib/film-clip-analyze-types.ts";
+import type { GamePlan, PracticeSession } from "../../src/features/library/model/library-meta.ts";
 
 const counter: FilmClipCounterSuggestion = {
   title: "ICE side PNR",

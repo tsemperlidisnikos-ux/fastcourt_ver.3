@@ -1,9 +1,9 @@
-import "@/styles/fd-ui.css";
-import "@/styles/fc-library.css";
-import "@/styles/fc-library-header.css";
-import "@/styles/fc-practice.css";
-import "@/styles/fc-playbooks.css";
-import "@/styles/fc-film-room.css";
+import "@/shared/styles/fd-ui.css";
+import "@/features/library/styles/fc-library.css";
+import "@/features/library/styles/fc-library-header.css";
+import "@/features/practice/styles/fc-practice.css";
+import "@/features/library/styles/fc-playbooks.css";
+import "@/features/film-room/styles/fc-film-room.css";
 
 export default function ScoutingLayout({
   children,

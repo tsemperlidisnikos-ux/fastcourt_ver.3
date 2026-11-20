@@ -9,8 +9,8 @@ import {
   nextAvailableJersey,
   normalizeDefenseLabel,
   reconcileRosterLabels,
-} from "../../src/lib/designer/player-limits.ts";
-import type { DesignerObject } from "../../src/types/designer.ts";
+} from "../../src/features/designer/lib/player-limits.ts";
+import type { DesignerObject } from "../../src/features/designer/model/designer.ts";
 
 function offense(id: string, label: string, hasBall = false): DesignerObject {
   return { id, kind: "offense", x: 0.5, y: 0.5, label, hasBall };

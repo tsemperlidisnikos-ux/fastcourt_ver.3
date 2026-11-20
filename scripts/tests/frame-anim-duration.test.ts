@@ -4,8 +4,8 @@ import {
   DEFAULT_FRAME_ANIM_DURATION_SEC,
   frameActionStepDurationMs,
   resolveFrameAnimDurationSec,
-} from "../../src/lib/designer/animation-timing.ts";
-import type { DesignerFrame } from "../../src/types/designer.ts";
+} from "../../src/features/designer/lib/animation-timing.ts";
+import type { DesignerFrame } from "../../src/features/designer/model/designer.ts";
 
 function frame(partial: Partial<DesignerFrame> = {}): DesignerFrame {
   return {

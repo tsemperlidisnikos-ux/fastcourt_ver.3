@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import {
   erasePartialAtPoint,
   eraseStrokesAt,
-} from "@/lib/designer/stroke-partial-eraser";
+} from "@/features/designer/lib/stroke-partial-eraser";
 
 describe("stroke partial eraser", () => {
   it("leaves stroke unchanged when eraser misses", () => {

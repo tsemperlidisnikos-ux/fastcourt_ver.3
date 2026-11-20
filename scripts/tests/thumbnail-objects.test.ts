@@ -4,8 +4,8 @@ import {
   ballHolderIdsAtFrameStart,
   frameObjectsForDesignerThumbnail,
   framesForDesignerThumbnails,
-} from "@/lib/designer/thumbnail-objects";
-import { fastDrawBallRingOuterRadiusPx } from "@/lib/designer/player-ball-ring";
+} from "@/features/designer/lib/thumbnail-objects";
+import { fastDrawBallRingOuterRadiusPx } from "@/features/designer/lib/player-ball-ring";
 import { makeAction, makeFrame, offense } from "./helpers";
 
 describe("thumbnail ball possession", () => {

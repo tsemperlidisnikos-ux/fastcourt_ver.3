@@ -3,9 +3,9 @@ import { describe, it, beforeEach, afterEach } from "node:test";
 import {
   checkDeviceLimit,
   getOrCreateDeviceId,
-} from "../../src/lib/auth/device-access.ts";
-import type { SessionUser } from "../../src/types/auth.ts";
-import { ROLES } from "../../src/lib/config.ts";
+} from "../../src/features/auth/lib/device-access.ts";
+import type { SessionUser } from "../../src/features/auth/model/auth.ts";
+import { ROLES } from "../../src/shared/lib/config.ts";
 
 function coachUser(): SessionUser {
   return {

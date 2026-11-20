@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { AuthConfirmClient } from "@/components/auth/AuthConfirmClient";
+import { AuthConfirmClient } from "@/features/auth/ui/AuthConfirmClient";
 
 export default function AuthConfirmPage() {
   return (

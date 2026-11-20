@@ -8,9 +8,9 @@ import {
   getSupabaseUrl,
   isCloudConfigured,
   isServiceRoleConfigured,
-} from "@/lib/supabase/env";
-import { normalizePlatformLayout } from "@/lib/settings/platform-layout";
-import type { PlatformLayoutSettings } from "@/types/platform-layout";
+} from "@/shared/lib/supabase/env";
+import { normalizePlatformLayout } from "@/features/settings/lib/platform-layout";
+import type { PlatformLayoutSettings } from "@/features/settings/model/platform-layout";
 
 const ROW_ID = "default";
 

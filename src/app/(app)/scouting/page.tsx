@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { FilmRoomScreen } from "@/components/film-room/FilmRoomScreen";
+import { FilmRoomScreen } from "@/features/film-room/ui/FilmRoomScreen";
 
 export default function ScoutingPage() {
   return (

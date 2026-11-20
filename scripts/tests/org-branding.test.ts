@@ -5,11 +5,11 @@ import {
   mergeOrgBrandingIntoPdfBrand,
   orgBrandingToPdfBrand,
   shouldApplyOrgBranding,
-} from "../../src/lib/settings/org-branding.ts";
-import { DEFAULT_PDF_BRAND } from "../../src/lib/settings/pdf-branding.ts";
-import type { TeamOrganization } from "../../src/types/team-org.ts";
-import type { SessionUser } from "../../src/types/auth.ts";
-import { ROLES } from "../../src/lib/config.ts";
+} from "../../src/features/settings/lib/org-branding.ts";
+import { DEFAULT_PDF_BRAND } from "../../src/features/settings/lib/pdf-branding.ts";
+import type { TeamOrganization } from "../../src/features/auth/model/team-org.ts";
+import type { SessionUser } from "../../src/features/auth/model/auth.ts";
+import { ROLES } from "../../src/shared/lib/config.ts";
 
 function baseUser(): SessionUser {
   return {

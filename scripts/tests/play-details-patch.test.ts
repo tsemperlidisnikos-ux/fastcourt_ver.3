@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { blankStoredPlay, patchStoredPlayFromDetails } from "@/lib/library/convert";
+import { blankStoredPlay, patchStoredPlayFromDetails } from "@/features/library/lib/convert";
 
 test("patchStoredPlayFromDetails updates series on stored play", () => {
   const play = {

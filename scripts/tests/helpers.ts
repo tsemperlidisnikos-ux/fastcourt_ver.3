@@ -1,4 +1,4 @@
-import type { DesignerAction, DesignerFrame, DesignerObject } from "@/types/designer";
+import type { DesignerAction, DesignerFrame, DesignerObject } from "@/features/designer/model/designer";
 
 export function offense(
   id: string,

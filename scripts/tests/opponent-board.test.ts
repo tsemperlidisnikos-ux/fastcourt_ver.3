@@ -4,10 +4,10 @@ import {
   createOpponentTendency,
   normalizeOpponentTendencies,
   suggestDefenseForTendency,
-} from "../../src/lib/game-plan/opponent-board.ts";
-import { normalizeGamePlan } from "../../src/lib/game-plan/game-plan-items.ts";
-import type { StoredPlay } from "../../src/types/library.ts";
-import type { GamePlan } from "../../src/types/library-meta.ts";
+} from "../../src/features/game-plan/lib/opponent-board.ts";
+import { normalizeGamePlan } from "../../src/features/game-plan/lib/game-plan-items.ts";
+import type { StoredPlay } from "../../src/features/library/model/library.ts";
+import type { GamePlan } from "../../src/features/library/model/library-meta.ts";
 
 function makePlay(
   id: string,

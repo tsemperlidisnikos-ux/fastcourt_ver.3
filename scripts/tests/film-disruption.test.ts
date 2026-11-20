@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { detectFilmDisruption } from "../../src/lib/film-room/film-disruption-detector.ts";
+import { detectFilmDisruption } from "../../src/features/film-room/lib/film-disruption-detector.ts";
 import {
   selectFilmDisruptionsForAnalyze,
   normalizeFilmDisruptionKind,
-} from "../../src/lib/film-room/film-disruption-tags.ts";
-import { suggestOffensePlaysForDisruption } from "../../src/lib/film-room/film-offense-variation-match.ts";
-import type { StoredPlay } from "../../src/types/library.ts";
+} from "../../src/features/film-room/lib/film-disruption-tags.ts";
+import { suggestOffensePlaysForDisruption } from "../../src/features/film-room/lib/film-offense-variation-match.ts";
+import type { StoredPlay } from "../../src/features/library/model/library.ts";
 
 describe("film-disruption-tags", () => {
   it("normalizes disruption kinds", () => {

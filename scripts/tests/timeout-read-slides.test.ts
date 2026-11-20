@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { createGamePlanDraft } from "../../src/lib/game-plan/game-plan-items.ts";
+import { createGamePlanDraft } from "../../src/features/game-plan/lib/game-plan-items.ts";
 import {
   buildTimeoutReadSlides,
   buildTimeoutViewSlides,
-} from "../../src/lib/game-plan/timeout-mode.ts";
-import { createDisruptionFilmRef } from "../../src/lib/film-room/film-game-plan-evidence.ts";
-import type { StoredPlay } from "../../src/types/library.ts";
+} from "../../src/features/game-plan/lib/timeout-mode.ts";
+import { createDisruptionFilmRef } from "../../src/features/film-room/lib/film-game-plan-evidence.ts";
+import type { StoredPlay } from "../../src/features/library/model/library.ts";
 
 describe("timeout read slides", () => {
   const play: StoredPlay = {

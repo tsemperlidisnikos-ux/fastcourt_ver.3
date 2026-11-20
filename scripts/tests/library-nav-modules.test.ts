@@ -7,7 +7,7 @@ import {
   orderedLibraryNavTabs,
   reorderLibraryNavModules,
   resolveLibraryScreenTab,
-} from "../../src/lib/settings/library-nav-modules.ts";
+} from "../../src/features/settings/lib/library-nav-modules.ts";
 
 describe("library nav modules", () => {
   it("defaults to production-visible sections only", () => {

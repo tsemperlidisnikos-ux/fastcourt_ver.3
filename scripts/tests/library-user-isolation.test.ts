@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import {
   shouldClearUntrustedLocalLibrary,
   shouldResetLibraryCache,
-} from "../../src/lib/library/library-cache-policy";
+} from "../../src/features/library/lib/library-cache-policy";
 
 assert.equal(
   shouldResetLibraryCache("user-a", "owner-a", "user-b", "owner-a"),

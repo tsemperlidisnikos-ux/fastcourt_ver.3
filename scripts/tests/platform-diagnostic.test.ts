@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
-import { summarizeFindings, type DiagnosticFinding } from "../../src/lib/admin/platform-diagnostic-types.ts";
+import { summarizeFindings, type DiagnosticFinding } from "../../src/features/settings/lib/admin/platform-diagnostic-types.ts";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -53,15 +53,15 @@ describe("platform diagnostic", () => {
 
   it("is wired only into AdminSettingsPanel", () => {
     const admin = fs.readFileSync(
-      path.join(ROOT, "src/components/settings/AdminSettingsPanel.tsx"),
+      path.join(ROOT, "src/features/settings/ui/AdminSettingsPanel.tsx"),
       "utf8",
     );
     const coach = fs.readFileSync(
-      path.join(ROOT, "src/components/settings/CoachSettingsPanel.tsx"),
+      path.join(ROOT, "src/features/settings/ui/CoachSettingsPanel.tsx"),
       "utf8",
     );
     const team = fs.readFileSync(
-      path.join(ROOT, "src/components/settings/TeamAdminSettingsPanel.tsx"),
+      path.join(ROOT, "src/features/settings/ui/TeamAdminSettingsPanel.tsx"),
       "utf8",
     );
     assert.match(admin, /PlatformDiagnosticPanel/);

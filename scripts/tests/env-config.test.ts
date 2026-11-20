@@ -4,7 +4,7 @@ import {
   getCloudConfigIssue,
   isCloudConfigured,
   isValidSupabaseProjectUrl,
-} from "@/lib/supabase/env";
+} from "@/shared/lib/supabase/env";
 
 describe("supabase env validation", () => {
   const originalUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

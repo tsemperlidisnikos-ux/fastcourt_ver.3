@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { cloneFrameForImport } from "../../src/lib/designer/designer-coach-import-frame";
-import type { DesignerFrame } from "../../src/types/designer";
+import { cloneFrameForImport } from "../../src/features/designer/lib/designer-coach-import-frame";
+import type { DesignerFrame } from "../../src/features/designer/model/designer";
 
 const source: DesignerFrame = {
   id: "f-src",

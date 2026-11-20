@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { snapCutEndpoints, snapDribbleEndpoints, snapHandoffEndpoints, snapPassEndpoints, snapScreenEndpoints, resolveLineDrawStart } from "@/lib/designer/player-edge-snap";
-import { lineSnapRadiusNorm } from "@/lib/designer/player-ball-ring";
+import { snapCutEndpoints, snapDribbleEndpoints, snapHandoffEndpoints, snapPassEndpoints, snapScreenEndpoints, resolveLineDrawStart } from "@/features/designer/lib/player-edge-snap";
+import { lineSnapRadiusNorm } from "@/features/designer/lib/player-ball-ring";
 import { makeAction, offense } from "./helpers";
 
 describe("cut line snap", () => {

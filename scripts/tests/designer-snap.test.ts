@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { findClosestActionLineEndpoint } from "@/lib/designer/line-chain-snap";
-import { closestPlayer, PLAYER_SNAP_NORM } from "@/lib/designer/player-snap";
-import { lineSnapRadiusNorm } from "@/lib/designer/player-ball-ring";
-import { snapPassEndpoints } from "@/lib/designer/player-edge-snap";
+import { findClosestActionLineEndpoint } from "@/features/designer/lib/line-chain-snap";
+import { closestPlayer, PLAYER_SNAP_NORM } from "@/features/designer/lib/player-snap";
+import { lineSnapRadiusNorm } from "@/features/designer/lib/player-ball-ring";
+import { snapPassEndpoints } from "@/features/designer/lib/player-edge-snap";
 import { defense, makeAction, offense } from "./helpers";
 
 describe("player snap", () => {

@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import {
   contrastingTextOnBackground,
   resolveHeaderNavActiveTextColor,
-} from "../../src/lib/settings/color-contrast.ts";
+} from "../../src/features/settings/lib/color-contrast.ts";
 
 describe("color contrast", () => {
   it("uses white text on dark green active tab", () => {

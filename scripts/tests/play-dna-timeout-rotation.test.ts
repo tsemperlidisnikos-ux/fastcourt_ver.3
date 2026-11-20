@@ -1,14 +1,14 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { simulateGuardRotations } from "../../src/lib/designer/defense-rotation-sim.ts";
+import { simulateGuardRotations } from "../../src/features/designer/lib/defense-rotation-sim.ts";
 import {
   findSimilarPlays,
   fingerprintPlay,
   playSimilarity,
-} from "../../src/lib/library/play-dna.ts";
-import { buildTimeoutSlides } from "../../src/lib/game-plan/timeout-mode.ts";
-import type { StoredPlay } from "../../src/types/library.ts";
-import type { GamePlan } from "../../src/types/library-meta.ts";
+} from "../../src/features/library/lib/play-dna.ts";
+import { buildTimeoutSlides } from "../../src/features/game-plan/lib/timeout-mode.ts";
+import type { StoredPlay } from "../../src/features/library/model/library.ts";
+import type { GamePlan } from "../../src/features/library/model/library-meta.ts";
 
 function makePlay(
   id: string,

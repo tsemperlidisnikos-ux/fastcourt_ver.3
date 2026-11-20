@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { computeAnimStepStateAtEased } from "@/lib/designer/animation-engine";
+import { computeAnimStepStateAtEased } from "@/features/designer/lib/animation-engine";
 import {
   resolvePlaybackSpeed,
   resolveStepAnimPhases,
-} from "@/lib/designer/animation-timing";
+} from "@/features/designer/lib/animation-timing";
 import { makeAction, makeFrame, offense } from "./helpers";
 
 describe("action animation phases", () => {

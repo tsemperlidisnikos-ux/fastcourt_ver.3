@@ -4,11 +4,11 @@ import {
   DEFAULT_BILLING_CONFIG,
   normalizeBillingConfig,
   normalizeLandingPricing,
-} from "../../src/lib/settings/billing-config.ts";
+} from "../../src/features/settings/lib/billing-config.ts";
 import {
   clubMonthlyPrice,
   individualMonthlyPrice,
-} from "../../src/lib/landing/pricing.ts";
+} from "../../src/shared/lib/landing/pricing.ts";
 
 describe("landing pricing config", () => {
   it("normalizes landing pricing numbers and coach slider bounds", () => {

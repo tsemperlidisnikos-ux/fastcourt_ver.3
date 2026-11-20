@@ -3,13 +3,13 @@ import assert from "node:assert/strict";
 import {
   mergeOpponentBoards,
   mergeScoutingNotes,
-} from "../../src/lib/game-plan/opponent-board.ts";
+} from "../../src/features/game-plan/lib/opponent-board.ts";
 import {
   createRematchGamePlan,
   importScoutFromPreviousPlan,
   scoutNotesFromPreviousPlan,
-} from "../../src/lib/game-plan/opponent-history.ts";
-import type { GamePlan } from "../../src/types/library-meta.ts";
+} from "../../src/features/game-plan/lib/opponent-history.ts";
+import type { GamePlan } from "../../src/features/library/model/library-meta.ts";
 
 function basePlan(overrides: Partial<GamePlan> = {}): GamePlan {
   return {

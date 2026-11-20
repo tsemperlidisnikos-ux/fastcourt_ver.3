@@ -5,6 +5,8 @@ const isNetlify = process.env.NETLIFY === "true";
 const nextConfig: NextConfig = {
   // Portable USB / Electron needs standalone, but Netlify Next plugin expects default output.
   output: isNetlify ? undefined : "standalone",
+  // Allow phone/tablet on LAN to use webpack HMR during `npm run dev`.
+  allowedDevOrigins: ["192.168.1.63"],
   async headers() {
     return [
       {

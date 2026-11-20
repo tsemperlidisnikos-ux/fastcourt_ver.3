@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { LibraryScreen } from "@/components/library/LibraryScreen";
+import { LibraryScreen } from "@/features/library/ui/LibraryScreen";
 
 export default function LibraryPage() {
   return (

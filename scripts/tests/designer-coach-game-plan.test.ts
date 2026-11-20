@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
-import { analyzePlayLocally } from "../../src/lib/designer/analyze-play-locally";
+import { analyzePlayLocally } from "../../src/features/designer/lib/analyze-play-locally";
 import {
   buildDesignerCoachGamePlanSnapshot,
   mergeGamePlanCounters,
   resolveDesignerCoachGamePlanId,
-} from "../../src/lib/designer/designer-coach-game-plan";
-import type { GamePlan } from "../../src/types/library-meta";
-import type { StoredPlay } from "../../src/types/library";
+} from "../../src/features/designer/lib/designer-coach-game-plan";
+import type { GamePlan } from "../../src/features/library/model/library-meta";
+import type { StoredPlay } from "../../src/features/library/model/library";
 
 function makePlay(): StoredPlay {
   return {

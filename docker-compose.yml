@@ -1,0 +1,35 @@
+# Optional local/Coolify compose reference
+services:
+  fastcourt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_APP_BUILD: coolify
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-}
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      NODE_ENV: production
+      # Server-only secrets (not needed in build args)
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped

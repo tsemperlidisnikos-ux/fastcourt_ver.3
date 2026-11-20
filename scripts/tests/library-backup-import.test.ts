@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { adoptImportedPlaysForSession } from "../../src/lib/settings/library-backup.ts";
-import type { StoredPlay } from "../../src/types/library";
+import { adoptImportedPlaysForSession } from "../../src/features/settings/lib/library-backup.ts";
+import type { StoredPlay } from "../../src/features/library/model/library";
 
 function samplePlay(id: string, ownerUserId?: string): StoredPlay {
   return {

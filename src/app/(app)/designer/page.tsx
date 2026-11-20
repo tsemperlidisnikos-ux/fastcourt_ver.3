@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { DesignerScreen } from "@/components/designer/DesignerScreen";
+import { DesignerScreen } from "@/features/designer/ui/DesignerScreen";
 
 export default function DesignerPage() {
   return (

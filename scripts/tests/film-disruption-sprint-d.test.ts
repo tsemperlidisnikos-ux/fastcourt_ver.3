@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { buildDesignerHref, parseDesignerFrameParam, resolvePlayFrameLinks } from "../../src/lib/designer/designer-deep-link.ts";
-import { parseFilmClipAiDisruption } from "../../src/lib/film-room/film-ai-disruption-parse.ts";
-import { comparePlayIdealToDisruption } from "../../src/lib/film-room/film-play-ideal-compare.ts";
-import { detectFilmDisruption } from "../../src/lib/film-room/film-disruption-detector.ts";
-import type { StoredPlay } from "../../src/types/library.ts";
+import { buildDesignerHref, parseDesignerFrameParam, resolvePlayFrameLinks } from "../../src/features/designer/lib/designer-deep-link.ts";
+import { parseFilmClipAiDisruption } from "../../src/features/film-room/lib/film-ai-disruption-parse.ts";
+import { comparePlayIdealToDisruption } from "../../src/features/film-room/lib/film-play-ideal-compare.ts";
+import { detectFilmDisruption } from "../../src/features/film-room/lib/film-disruption-detector.ts";
+import type { StoredPlay } from "../../src/features/library/model/library.ts";
 
 describe("designer-deep-link", () => {
   it("builds href with frame index", () => {

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { getOpenAiVisionModel, isOpenAiConfigured } from "@/lib/ai/env";
-import { getRequestAuthUser } from "@/lib/auth/api-user";
-import type { FilmAnalyzeStatusResponse } from "@/lib/film-room/film-clip-analyze-types";
-import { isCloudConfigured } from "@/lib/supabase/env";
+import { getOpenAiVisionModel, isOpenAiConfigured } from "@/shared/lib/ai/env";
+import { getRequestAuthUser } from "@/features/auth/lib/api-user";
+import type { FilmAnalyzeStatusResponse } from "@/features/film-room/lib/film-clip-analyze-types";
+import { isCloudConfigured } from "@/shared/lib/supabase/env";
 
 export const runtime = "nodejs";
 

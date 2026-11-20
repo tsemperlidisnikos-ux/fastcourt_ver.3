@@ -5,8 +5,8 @@ import {
   buildFilmScoutPrintModel,
   buildFilmScoutPrintModelFromSessionAnalyses,
   formatFilmScoutGeneratedAt,
-} from "../../src/lib/film-room/film-scout-print-model.ts";
-import type { FilmRoomSession } from "../../src/types/film-room.ts";
+} from "../../src/features/film-room/lib/film-scout-print-model.ts";
+import type { FilmRoomSession } from "../../src/features/film-room/model/film-room.ts";
 
 const sampleResult = {
   summary: "They flow into side PNR with weak-side tag.",

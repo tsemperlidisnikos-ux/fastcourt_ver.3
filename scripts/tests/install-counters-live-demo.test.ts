@@ -4,7 +4,7 @@ import {
   COUNTERS_LIVE_DEMO_PLAN_ID,
   buildCountersLiveDemoPlan,
   countersLiveDemoHref,
-} from "../../src/lib/demo/install-counters-live-demo.ts";
+} from "../../src/features/demo/lib/install-counters-live-demo.ts";
 
 test("buildCountersLiveDemoPlan has counters, defense, and scout board", () => {
   const plan = buildCountersLiveDemoPlan();

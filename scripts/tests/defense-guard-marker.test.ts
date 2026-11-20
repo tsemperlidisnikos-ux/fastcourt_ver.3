@@ -5,7 +5,7 @@ import {
   guardHitRadius,
   guardRotationFromStagePoint,
   normalizeDefenseMarkerStyle,
-} from "../../src/lib/designer/defense-marker-style.ts";
+} from "../../src/features/designer/lib/defense-marker-style.ts";
 
 describe("defense guard marker", () => {
   it("normalizes marker style", () => {

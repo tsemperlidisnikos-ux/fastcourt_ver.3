@@ -8,12 +8,12 @@ import {
   getSupabaseUrl,
   isCloudConfigured,
   isServiceRoleConfigured,
-} from "@/lib/supabase/env";
+} from "@/shared/lib/supabase/env";
 import {
   adminUserToProfileUpdate,
   isPersistableCloudProfile,
-} from "@/lib/auth/profiles-cloud";
-import type { AdminUserRecord } from "@/types/admin-user";
+} from "@/features/auth/lib/profiles-cloud";
+import type { AdminUserRecord } from "@/features/auth/model/admin-user";
 
 async function getAuthedUser() {
   if (!isCloudConfigured()) return null;

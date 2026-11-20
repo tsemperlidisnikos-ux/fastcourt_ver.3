@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { ShareProviders } from "@/components/share/ShareProviders";
+import { ShareProviders } from "@/features/share/ui/ShareProviders";
 import {
   APP_DESCRIPTION,
   APP_ICON_PATH,
@@ -7,7 +7,7 @@ import {
   APP_NAME,
   PWA_BACKGROUND_COLOR,
   PWA_THEME_COLOR,
-} from "@/lib/config";
+} from "@/shared/lib/config";
 import "./globals.css";
 
 export const metadata: Metadata = {

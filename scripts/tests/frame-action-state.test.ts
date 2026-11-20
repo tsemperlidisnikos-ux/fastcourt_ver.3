@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { objectsAfterFrameActions } from "@/lib/designer/frame-propagation";
-import { snapScreenEndpoints } from "@/lib/designer/player-edge-snap";
+import { objectsAfterFrameActions } from "@/features/designer/lib/frame-propagation";
+import { snapScreenEndpoints } from "@/features/designer/lib/player-edge-snap";
 import { makeAction, offense } from "./helpers";
-import type { DesignerFrame } from "@/types/designer";
+import type { DesignerFrame } from "@/features/designer/model/designer";
 
 function makeFrame(
   objects: DesignerFrame["objects"],

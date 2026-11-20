@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { suggestPlaysFromAiPatterns } from "../../src/lib/film-room/ai-play-pattern-match.ts";
-import type { StoredPlay } from "../../src/types/library.ts";
+import { suggestPlaysFromAiPatterns } from "../../src/features/film-room/lib/ai-play-pattern-match.ts";
+import type { StoredPlay } from "../../src/features/library/model/library.ts";
 
 function stubPlay(id: string, title: string, tags: string[] = []): StoredPlay {
   return {

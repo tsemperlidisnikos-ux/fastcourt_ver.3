@@ -1,14 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { createGamePlanDraft } from "../../src/lib/game-plan/game-plan-items.ts";
-import { buildAiScoutGamePlanPatch } from "../../src/lib/film-room/apply-ai-scout-to-game-plan.ts";
+import { createGamePlanDraft } from "../../src/features/game-plan/lib/game-plan-items.ts";
+import { buildAiScoutGamePlanPatch } from "../../src/features/film-room/lib/apply-ai-scout-to-game-plan.ts";
 import {
   collectGamePlanFilmEvidence,
   createAiScoutFilmRef,
   createDisruptionFilmRef,
   mergeFilmRefs,
   normalizeFilmRefs,
-} from "../../src/lib/film-room/film-game-plan-evidence.ts";
+} from "../../src/features/film-room/lib/film-game-plan-evidence.ts";
 
 describe("film game plan evidence", () => {
   it("collects film evidence from board tags, timeout cues, and refs", () => {

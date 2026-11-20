@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { buildWoodTileRects, HG_WOOD_PLANK_WIDTH_FT } from "@/lib/designer/court-wood-tiles";
-import { getCourtHgTemplate } from "@/lib/designer/court-hg-templates";
+import { buildWoodTileRects, HG_WOOD_PLANK_WIDTH_FT } from "@/features/designer/lib/court-wood-tiles";
+import { getCourtHgTemplate } from "@/features/designer/lib/court-hg-templates";
 
 function testWoodTiles() {
   const spec = getCourtHgTemplate("NCAA");

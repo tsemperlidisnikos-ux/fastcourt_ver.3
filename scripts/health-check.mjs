@@ -249,13 +249,13 @@ function checkKnownGaps() {
     {
       area: "Designer",
       item: "WebM/MP4 animation export",
-      path: "src/components/designer/DesignerScreen.tsx",
+      path: "src/features/designer/ui/DesignerScreen.tsx",
       pattern: /handleExportAnimationMp4|exportPlayAnimationMp4/,
     },
     {
       area: "PlayBank",
       item: "PlayBank overlay & catalog",
-      check: () => dirHasSourceFiles("src/components/playbank"),
+      check: () => dirHasSourceFiles("src/features/playbank"),
     },
     {
       area: "Infrastructure",
@@ -265,7 +265,7 @@ function checkKnownGaps() {
     {
       area: "Infrastructure",
       item: "Cloud sync library panel",
-      check: () => dirHasSourceFiles("src/lib/cloud"),
+      check: () => dirHasSourceFiles("src/shared/lib/cloud"),
     },
   ];
 

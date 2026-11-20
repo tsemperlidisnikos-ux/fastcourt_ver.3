@@ -5,7 +5,7 @@ import {
   decodeInvitePayload,
   encodeInvitePayload,
   type PendingTeamInvite,
-} from "../../src/lib/auth/team-invite.ts";
+} from "../../src/features/auth/lib/team-invite.ts";
 
 const invite: PendingTeamInvite = {
   token: "abc123def456",

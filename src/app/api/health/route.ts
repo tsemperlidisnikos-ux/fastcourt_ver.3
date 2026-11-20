@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { APP_BUILD, APP_NAME } from "@/lib/config";
-import { isCloudConfigured } from "@/lib/supabase/env";
+import { APP_BUILD, APP_NAME } from "@/shared/lib/config";
+import { isCloudConfigured } from "@/shared/lib/supabase/env";
 
 export const runtime = "nodejs";
 

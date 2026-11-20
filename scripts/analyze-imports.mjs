@@ -99,12 +99,8 @@ function parseImports(fileAbs) {
 function layerOf(relPath) {
   const p = relPath.replace(/\\/g, "/");
   if (p.startsWith("src/app/")) return "app";
-  if (p.startsWith("src/components/")) return "components";
-  if (p.startsWith("src/lib/")) return "lib";
-  if (p.startsWith("src/stores/")) return "stores";
-  if (p.startsWith("src/hooks/")) return "hooks";
-  if (p.startsWith("src/types/")) return "types";
-  if (p.startsWith("src/styles/")) return "styles";
+  if (p.startsWith("src/features/")) return "features";
+  if (p.startsWith("src/shared/")) return "shared";
   return "other";
 }
 

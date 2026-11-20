@@ -3,9 +3,9 @@ import {
   filterPlaysForLibraryScope,
   playOwnedBySessionUser,
   usesPersonalPlayOwnership,
-} from "../../src/lib/library/play-ownership";
-import type { SessionUser } from "../../src/types/auth";
-import type { StoredPlay } from "../../src/types/library";
+} from "../../src/features/library/lib/play-ownership";
+import type { SessionUser } from "../../src/features/auth/model/auth";
+import type { StoredPlay } from "../../src/features/library/model/library";
 
 function play(id: string, ownerUserId?: string, ownerEmail?: string): StoredPlay {
   return {

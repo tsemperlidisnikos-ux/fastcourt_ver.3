@@ -3,9 +3,9 @@ import { describe, it } from "node:test";
 import {
   buildDisruptionPracticeEntries,
   buildDisruptionPracticeNotes,
-} from "../../src/lib/film-room/film-practice-disruption.ts";
-import { detectFilmDisruption } from "../../src/lib/film-room/film-disruption-detector.ts";
-import type { StoredPlay } from "../../src/types/library.ts";
+} from "../../src/features/film-room/lib/film-practice-disruption.ts";
+import { detectFilmDisruption } from "../../src/features/film-room/lib/film-disruption-detector.ts";
+import type { StoredPlay } from "../../src/features/library/model/library.ts";
 
 describe("film-practice-disruption", () => {
   const play: StoredPlay = {

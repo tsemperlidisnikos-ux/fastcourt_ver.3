@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { fetchProfile } from "@/lib/auth/profile";
-import { upsertProfileForUser } from "@/lib/auth/signup";
+import { fetchProfile } from "@/features/auth/lib/profile";
+import { upsertProfileForUser } from "@/features/auth/lib/signup";
 import {
   PASSWORD_RECOVERY_LOGIN_PATH,
   safeNextPath,
-} from "@/lib/auth/safe-next-path";
-import { createClient } from "@/lib/supabase/server";
-import { isCloudConfigured } from "@/lib/supabase/env";
+} from "@/features/auth/lib/safe-next-path";
+import { createClient } from "@/shared/lib/supabase/server";
+import { isCloudConfigured } from "@/shared/lib/supabase/env";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);

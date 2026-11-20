@@ -4,8 +4,8 @@ import {
   countPenStrokes,
   isPenStroke,
   withoutPenStrokes,
-} from "@/lib/film-room/film-room-strokes";
-import type { VideoAnnotationStroke } from "@/types/film-room";
+} from "@/features/film-room/lib/film-room-strokes";
+import type { VideoAnnotationStroke } from "@/features/film-room/model/film-room";
 
 function stroke(kind: "pen" | "laser"): VideoAnnotationStroke {
   return {

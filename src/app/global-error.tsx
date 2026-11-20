@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { APP_NAME } from "@/lib/config";
+import { APP_NAME } from "@/shared/lib/config";
 
 /** Inline styles only — avoid CSS imports so Next.js does not preload global-error.css on every page. */
 export default function GlobalError({

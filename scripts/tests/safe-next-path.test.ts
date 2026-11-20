@@ -7,7 +7,7 @@ import {
   loginSignedOutUrl,
   PASSWORD_RECOVERY_LOGIN_PATH,
   safeNextPath,
-} from "../../src/lib/auth/safe-next-path.ts";
+} from "../../src/features/auth/lib/safe-next-path.ts";
 
 describe("safe-next-path", () => {
   it("blocks protocol-relative redirects", () => {

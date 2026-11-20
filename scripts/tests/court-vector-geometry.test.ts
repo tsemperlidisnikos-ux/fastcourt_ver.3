@@ -3,9 +3,9 @@ import {
   buildCourtVectorGeometry,
   countHgElements,
   courtLengthFt,
-} from "@/lib/designer/court-vector-geometry";
-import type { CourtTemplate } from "@/types/designer";
-import { getCourtAspect, getCourtHgTemplate } from "@/lib/designer/court-hg-templates";
+} from "@/features/designer/lib/court-vector-geometry";
+import type { CourtTemplate } from "@/features/designer/model/designer";
+import { getCourtAspect, getCourtHgTemplate } from "@/features/designer/lib/court-hg-templates";
 
 const TEMPLATE_COUNTS: Record<CourtTemplate, { full: number; half: number }> = {
   NCAA: { full: 33, half: 17 },

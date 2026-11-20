@@ -3,15 +3,15 @@ import { afterEach, beforeEach, describe, it } from "node:test";
 import {
   resolveLibraryCloudUserId,
   usesOrganizationSharedLibrary,
-} from "../../src/lib/cloud/library-owner.ts";
+} from "../../src/shared/lib/cloud/library-owner.ts";
 import {
   newOrgMember,
   newOrganization,
   saveTeamOrganizations,
-} from "../../src/lib/auth/team-organizations.ts";
-import { usesPersonalPlayOwnership } from "../../src/lib/library/play-ownership.ts";
-import type { SessionUser } from "../../src/types/auth.ts";
-import { ROLES } from "../../src/lib/config.ts";
+} from "../../src/features/auth/lib/team-organizations.ts";
+import { usesPersonalPlayOwnership } from "../../src/features/library/lib/play-ownership.ts";
+import type { SessionUser } from "../../src/features/auth/model/auth.ts";
+import { ROLES } from "../../src/shared/lib/config.ts";
 
 const STORAGE_KEY = "fastcourt_team_orgs_v1";
 

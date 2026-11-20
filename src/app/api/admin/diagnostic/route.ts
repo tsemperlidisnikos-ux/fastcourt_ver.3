@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { isOpenAiConfigured, getOpenAiVisionModel } from "@/lib/ai/env";
+import { isOpenAiConfigured, getOpenAiVisionModel } from "@/shared/lib/ai/env";
 import {
   getSupabaseAnonKey,
   getSupabaseServiceRoleKey,
@@ -10,8 +10,8 @@ import {
   isCloudConfigured,
   isServiceRoleConfigured,
   isStripeConfigured,
-} from "@/lib/supabase/env";
-import { APP_BUILD, APP_NAME } from "@/lib/config";
+} from "@/shared/lib/supabase/env";
+import { APP_BUILD, APP_NAME } from "@/shared/lib/config";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { AppErrorFallback } from "@/components/ui/AppErrorFallback";
-import { tryRecoverFromChunkLoadError } from "@/lib/ui/chunk-load-error";
+import { AppErrorFallback } from "@/shared/ui/kit/AppErrorFallback";
+import { tryRecoverFromChunkLoadError } from "@/shared/lib/ui/chunk-load-error";
 
 export default function AppRouteError({
   error,

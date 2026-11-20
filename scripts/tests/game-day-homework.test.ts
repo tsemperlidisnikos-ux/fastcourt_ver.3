@@ -2,12 +2,12 @@ import assert from "node:assert/strict";
 import {
   buildGameDayCategories,
   resolveGameDayCategoryIndex,
-} from "../../src/lib/game-plan/game-day";
+} from "../../src/features/game-plan/lib/game-day";
 import {
   ensureHomeworkPlayerToken,
   validateHomeworkPlayerToken,
-} from "../../src/lib/game-plan/player-homework-ack";
-import type { GamePlan, PlayerHomeworkAssignment } from "../../src/types/library-meta";
+} from "../../src/features/game-plan/lib/player-homework-ack";
+import type { GamePlan, PlayerHomeworkAssignment } from "../../src/features/library/model/library-meta";
 
 const plan: GamePlan = {
   id: "gp1",

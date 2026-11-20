@@ -4,9 +4,9 @@ import {
   appendFilmAnalysisRecord,
   createFilmAnalysisRecord,
   filmAnalysisRecordLabel,
-} from "../../src/lib/film-room/film-analysis-history.ts";
-import { normalizeFilmEventKind } from "../../src/lib/film-room/film-event-tags.ts";
-import { canCaptureFilmFrames } from "../../src/lib/film-room/capture-film-frames.ts";
+} from "../../src/features/film-room/lib/film-analysis-history.ts";
+import { normalizeFilmEventKind } from "../../src/features/film-room/lib/film-event-tags.ts";
+import { canCaptureFilmFrames } from "../../src/features/film-room/lib/capture-film-frames.ts";
 
 describe("film room steps 1-6 helpers", () => {
   it("accepts expanded event kinds", () => {

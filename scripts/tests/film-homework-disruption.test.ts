@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { createGamePlanDraft } from "../../src/lib/game-plan/game-plan-items.ts";
+import { createGamePlanDraft } from "../../src/features/game-plan/lib/game-plan-items.ts";
 import {
   buildDisruptionHomeworkFromPlan,
   buildHomeworkReadItemsFromEntries,
   countNewHomeworkReads,
   mergeHomeworkReadItems,
-} from "../../src/lib/film-room/film-homework-disruption.ts";
-import { normalizePlayerHomework } from "../../src/lib/game-plan/player-homework.ts";
-import { encodeHomeworkPayload } from "../../src/lib/share/share-link.ts";
-import type { StoredPlay } from "../../src/types/library.ts";
+} from "../../src/features/film-room/lib/film-homework-disruption.ts";
+import { normalizePlayerHomework } from "../../src/features/game-plan/lib/player-homework.ts";
+import { encodeHomeworkPayload } from "../../src/features/share/lib/share-link.ts";
+import type { StoredPlay } from "../../src/features/library/model/library.ts";
 
 describe("film-homework-disruption", () => {
   const play: StoredPlay = {

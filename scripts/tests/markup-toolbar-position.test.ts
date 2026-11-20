@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import {
   clampMarkupToolbarPosition,
   defaultMarkupToolbarPosition,
-} from "../../src/lib/film-room/markup-toolbar-position.ts";
+} from "../../src/features/film-room/lib/markup-toolbar-position.ts";
 
 const boundsWidth = 960;
 const boundsHeight = 540;

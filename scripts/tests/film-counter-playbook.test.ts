@@ -6,8 +6,8 @@ import {
   normalizeCounterCoverage,
   normalizeCounterSuggestion,
   suggestDefensePlaysForCounter,
-} from "../../src/lib/film-room/film-counter-playbook.ts";
-import type { StoredPlay } from "../../src/types/library.ts";
+} from "../../src/features/film-room/lib/film-counter-playbook.ts";
+import type { StoredPlay } from "../../src/features/library/model/library.ts";
 
 function stubPlay(id: string, title: string, tags: string[] = []): StoredPlay {
   return {

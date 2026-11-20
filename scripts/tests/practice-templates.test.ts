@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { templateFromSession } from "../../src/lib/practice/templates";
-import type { PracticeSession } from "../../src/types/library-meta";
+import { templateFromSession } from "../../src/features/practice/lib/templates";
+import type { PracticeSession } from "../../src/features/library/model/library-meta";
 
 const session: PracticeSession = {
   id: "sess_1",

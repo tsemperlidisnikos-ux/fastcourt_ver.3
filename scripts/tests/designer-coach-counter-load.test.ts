@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
-import { resolveCounterDefensePlay } from "../../src/lib/designer/designer-coach-counter-load";
-import type { FilmClipCounterSuggestion } from "../../src/lib/film-room/film-clip-analyze-types";
-import type { StoredPlay } from "../../src/types/library";
+import { resolveCounterDefensePlay } from "../../src/features/designer/lib/designer-coach-counter-load";
+import type { FilmClipCounterSuggestion } from "../../src/features/film-room/lib/film-clip-analyze-types";
+import type { StoredPlay } from "../../src/features/library/model/library";
 
 const counter: FilmClipCounterSuggestion = {
   title: "ICE vs PNR",

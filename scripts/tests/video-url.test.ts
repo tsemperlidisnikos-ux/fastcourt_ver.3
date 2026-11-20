@@ -4,7 +4,7 @@ import {
   canInlineEmbedVideo,
   isValidVideoUrl,
   parseVideoUrl,
-} from "@/lib/library/video-url";
+} from "@/features/library/lib/video-url";
 
 describe("video url parsing", () => {
   it("parses YouTube watch and short links", () => {

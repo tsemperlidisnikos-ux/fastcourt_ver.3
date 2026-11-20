@@ -1,20 +1,20 @@
 import { NextResponse } from "next/server";
-import { isOpenAiConfigured, getOpenAiApiKey, getOpenAiVisionModel } from "@/lib/ai/env";
-import { AI_ANALYZE_RATE_LIMIT } from "@/lib/ai/rate-limit";
-import { requireAiCaller } from "@/lib/ai/require-ai-caller";
+import { isOpenAiConfigured, getOpenAiApiKey, getOpenAiVisionModel } from "@/shared/lib/ai/env";
+import { AI_ANALYZE_RATE_LIMIT } from "@/shared/lib/ai/rate-limit";
+import { requireAiCaller } from "@/shared/lib/ai/require-ai-caller";
 import {
   buildFilmClipAnalyzePrompt,
   parseFilmClipAnalysisPayload,
-} from "@/lib/film-room/film-clip-analyze-prompt";
-import { normalizeFilmAnalyzeEvents } from "@/lib/film-room/film-event-tags";
-import { normalizeFilmAnalyzeDisruptions } from "@/lib/film-room/film-disruption-tags";
-import { normalizeFilmAnalyzeFrameTimes } from "@/lib/film-room/film-analyze-context";
-import { FILM_CLIP_ANALYZE_FRAME_MAX } from "@/lib/film-room/capture-video-frames";
+} from "@/features/film-room/lib/film-clip-analyze-prompt";
+import { normalizeFilmAnalyzeEvents } from "@/features/film-room/lib/film-event-tags";
+import { normalizeFilmAnalyzeDisruptions } from "@/features/film-room/lib/film-disruption-tags";
+import { normalizeFilmAnalyzeFrameTimes } from "@/features/film-room/lib/film-analyze-context";
+import { FILM_CLIP_ANALYZE_FRAME_MAX } from "@/features/film-room/lib/capture-video-frames";
 import type {
   FilmClipAnalyzeErrorResponse,
   FilmClipAnalyzeRequest,
   FilmClipAnalyzeResponse,
-} from "@/lib/film-room/film-clip-analyze-types";
+} from "@/features/film-room/lib/film-clip-analyze-types";
 
 export const runtime = "nodejs";
 

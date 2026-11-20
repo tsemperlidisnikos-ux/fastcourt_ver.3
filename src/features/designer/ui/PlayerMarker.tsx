@@ -1,0 +1,395 @@
+"use client";
+
+import { useRef } from "react";
+import { Circle, Group, Line, Text } from "react-konva";
+import type Konva from "konva";
+import { ConeMarker } from "@/features/designer/ui/ConeMarker";
+import { GuardMarkerGlyph } from "@/features/designer/ui/GuardMarkerGlyph";
+import { GuardRotationHandleLocal } from "@/features/designer/ui/DefenseRotationHandle";
+import { ShadowMarker } from "@/features/designer/ui/ShadowMarker";
+import { ZoneMarker } from "@/features/designer/ui/ZoneMarker";
+import { OBJECT_COLORS } from "@/features/designer/lib/constants";
+import { DEFAULT_APP_FONT_KONVA } from "@/shared/lib/config";
+import {
+  guardHitRadius,
+  normalizeDefenseMarkerStyle,
+} from "@/features/designer/lib/defense-marker-style";
+import { formatDefenseDisplayLabel, normalizeDefenseLabel } from "@/features/designer/lib/player-limits";
+import { getEditorPlayerJerseyFontSize } from "@/features/designer/lib/action-geometry";
+import { editorBallRingOuterRadiusFromFontSize, fastDrawBallRingOuterRadiusPx } from "@/features/designer/lib/player-ball-ring";
+import { useSettingsStore } from "@/features/settings/model/settings-store";
+import type { CourtRect, DesignerObject } from "@/features/designer/model/designer";
+
+interface Props {
+  object: DesignerObject;
+  x: number;
+  y: number;
+  radius: number;
+  court?: CourtRect;
+  compact?: boolean;
+  /** Override compact font size (library thumbnails). */
+  compactFontSize?: number;
+  /** Override compact circle / ball ring stroke (print thumbnails). */
+  compactStrokeWidth?: number;
+  /** Extra radius for ball-possession ring (legacy additive override). */
+  ballRingExtra?: number;
+  /** Ball ring stroke width override. */
+  ballRingStrokeWidth?: number;
+  /** Court editor vs thumbnail ball ring styling. */
+  ballRingMode?: "editor" | "thumbnail";
+  /** Thinner guard lines in frame thumbnails. */
+  guardStrokeVariant?: "court" | "frame";
+  listening?: boolean;
+  draggable?: boolean;
+  onPointerUp?: (e: { cancelBubble: boolean }) => void;
+  onDragEnd?: (x: number, y: number) => void;
+  selected?: boolean;
+  /** Dashed coach preview overlay before Apply. */
+  ghost?: boolean;
+}
+
+export function PlayerMarker({
+  object,
+  x,
+  y,
+  radius,
+  court,
+  compact = false,
+  compactFontSize,
+  compactStrokeWidth,
+  ballRingExtra,
+  ballRingStrokeWidth,
+  ballRingMode,
+  guardStrokeVariant = "court",
+  listening = false,
+  draggable = false,
+  onPointerUp,
+  onDragEnd,
+  selected = false,
+  ghost = false,
+}: Props) {
+  const draggedRef = useRef(false);
+  const playerDisplay = useSettingsStore((s) => s.appearance.playerDisplay);
+  const hitListening = listening || draggable;
+
+  if (object.kind === "ball") {
+    const ballRadius = Math.max(6, radius * 0.42);
+
+    function handleBallDragStart(e: Konva.KonvaEventObject<DragEvent>) {
+      e.cancelBubble = true;
+      draggedRef.current = false;
+    }
+
+    function handleBallDragMove(e: Konva.KonvaEventObject<DragEvent>) {
+      e.cancelBubble = true;
+      draggedRef.current = true;
+    }
+
+    function handleBallDragEnd(e: Konva.KonvaEventObject<DragEvent>) {
+      e.cancelBubble = true;
+      const node = e.target;
+      onDragEnd?.(node.x(), node.y());
+    }
+
+    return (
+      <Group
+        x={x}
+        y={y}
+        draggable={draggable}
+        onDragStart={draggable ? handleBallDragStart : undefined}
+        onDragMove={draggable ? handleBallDragMove : undefined}
+        onDragEnd={draggable ? handleBallDragEnd : undefined}
+        onPointerDown={hitListening ? (e) => { e.cancelBubble = true; } : undefined}
+        onPointerUp={(e) => {
+          if (draggedRef.current) {
+            draggedRef.current = false;
+            return;
+          }
+          if (!hitListening) return;
+          e.cancelBubble = true;
+          onPointerUp?.(e);
+        }}
+      >
+        <Circle
+          radius={ballRadius + 8}
+          fill="rgba(0,0,0,0.001)"
+          listening={hitListening}
+        />
+        <Circle
+          radius={ballRadius}
+          fill={OBJECT_COLORS.ball}
+          stroke="#111111"
+          strokeWidth={1.5}
+          listening={false}
+        />
+      </Group>
+    );
+  }
+  const fontSize = compact
+    ? (compactFontSize ??
+      Math.max(radius >= 5 ? 9 : 7, radius * (radius >= 5 ? 1.12 : 0.95)))
+    : getEditorPlayerJerseyFontSize(
+        radius,
+        object.kind === "defense" ? "defense" : "offense",
+      );
+  const isOffense = object.kind === "offense";
+  const isDefense = object.kind === "defense";
+  const isPlayer = isOffense || isDefense;
+  const defenseStyle = normalizeDefenseMarkerStyle(object.defenseStyle);
+  const isGuardDefense = isDefense && defenseStyle === "guard";
+  const guardRotation = object.rotation ?? 0;
+  const circleDisplayMode = playerDisplay === "circle";
+  const showCircleRing = compact
+    ? circleDisplayMode
+    : circleDisplayMode || selected;
+  const ringRadius = radius * 1.12;
+  const hasBallRing = isOffense && !!object.hasBall;
+  const offenseCircle = isOffense && showCircleRing && !hasBallRing;
+  const defenseCircle = isDefense && !isGuardDefense && (showCircleRing || !compact);
+  const showMarkerRing = offenseCircle || defenseCircle;
+  const labelRadius =
+    isPlayer && (showCircleRing || showMarkerRing) ? ringRadius : radius;
+  const jerseyText = isGuardDefense
+    ? normalizeDefenseLabel(object.label ?? "") ?? ""
+    : isDefense
+      ? formatDefenseDisplayLabel(object.label)
+      : object.label ?? "";
+  const textFrameRadius = isGuardDefense || showMarkerRing ? ringRadius : labelRadius;
+  const jerseyBoxHeight = textFrameRadius * 2;
+  const jerseyBoxWidth =
+    jerseyText.length > 1
+      ? Math.max(textFrameRadius * 2.5, fontSize * 0.58 * jerseyText.length)
+      : textFrameRadius * 2;
+  const displayFontSize = isGuardDefense || showMarkerRing
+    ? Math.min(
+        fontSize,
+        Math.round(ringRadius * (jerseyText.length > 1 ? 1.15 : 1.22)),
+      )
+    : fontSize;
+  const markerStroke = compactStrokeWidth ?? (compact ? 1 : 2.75);
+  const offenseRingStroke = "#000000";
+  const jerseyFontStyle = "bold";
+  const markerHitRadius =
+    isGuardDefense
+      ? guardHitRadius(ringRadius) + 5
+      : isPlayer && (showCircleRing || showMarkerRing)
+        ? ringRadius + 5
+        : radius + 6;
+  const resolvedBallMode =
+    ballRingMode ?? (compact ? "thumbnail" : "editor");
+  const ballRingRadius =
+    ballRingExtra != null
+      ? radius + ballRingExtra
+      : resolvedBallMode === "editor"
+        ? editorBallRingOuterRadiusFromFontSize(fontSize)
+        : fastDrawBallRingOuterRadiusPx(fontSize);
+  const ballStroke =
+    ballRingStrokeWidth ?? (resolvedBallMode === "editor" ? 2.75 : 1);
+  const ballStrokeColor = "#000000";
+  const ghostStroke = "#0ea5e9";
+  const ghostOpacity = ghost ? 0.72 : 1;
+  const markerDash = ghost ? [7, 5] : undefined;
+
+  function handleDragStart(e: Konva.KonvaEventObject<DragEvent>) {
+    e.cancelBubble = true;
+    draggedRef.current = false;
+  }
+
+  function handleDragMove(e: Konva.KonvaEventObject<DragEvent>) {
+    e.cancelBubble = true;
+    draggedRef.current = true;
+  }
+
+  function handleDragEnd(e: Konva.KonvaEventObject<DragEvent>) {
+    e.cancelBubble = true;
+    const node = e.target;
+    onDragEnd?.(node.x(), node.y());
+  }
+
+  function handlePointerDown(e: Konva.KonvaEventObject<PointerEvent>) {
+    e.cancelBubble = true;
+  }
+
+  return (
+    <Group
+      x={x}
+      y={y}
+      opacity={ghostOpacity}
+      draggable={draggable && !ghost}
+      onDragStart={draggable ? handleDragStart : undefined}
+      onDragMove={draggable ? handleDragMove : undefined}
+      onDragEnd={draggable ? handleDragEnd : undefined}
+      onPointerDown={hitListening ? handlePointerDown : undefined}
+      onPointerUp={(e) => {
+        if (draggedRef.current) {
+          draggedRef.current = false;
+          return;
+        }
+        if (!hitListening) return;
+        e.cancelBubble = true;
+        onPointerUp?.(e);
+      }}
+    >
+      <Circle
+        radius={markerHitRadius}
+        fill="rgba(0,0,0,0.001)"
+        listening={hitListening}
+      />
+      {isGuardDefense ? (
+        <GuardMarkerGlyph
+          mode="konva"
+          circleRadius={ringRadius}
+          label={jerseyText}
+          labelFontSize={displayFontSize}
+          labelBoxWidth={jerseyBoxWidth}
+          labelBoxHeight={jerseyBoxHeight}
+          arcRotationDeg={guardRotation}
+          strokeVariant={guardStrokeVariant}
+        />
+      ) : null}
+      {isDefense && defenseCircle ? (
+        <Circle
+          radius={ringRadius}
+          fill="transparent"
+          stroke={ghost ? ghostStroke : OBJECT_COLORS.defense}
+          strokeWidth={markerStroke}
+          dash={markerDash}
+          strokeScaleEnabled={false}
+          listening={false}
+        />
+      ) : null}
+      {offenseCircle ? (
+        <Circle
+          radius={ringRadius}
+          fill="transparent"
+          stroke={ghost ? ghostStroke : offenseRingStroke}
+          strokeWidth={markerStroke}
+          dash={markerDash}
+          strokeScaleEnabled={false}
+          listening={false}
+        />
+      ) : null}
+      {isPlayer && jerseyText && !isGuardDefense ? (
+        <Text
+          text={jerseyText}
+          fontSize={displayFontSize}
+          fill={ghost ? ghostStroke : isDefense ? OBJECT_COLORS.defense : "#111111"}
+          fontStyle={jerseyFontStyle}
+          fontFamily={DEFAULT_APP_FONT_KONVA}
+          align="center"
+          verticalAlign="middle"
+          x={-jerseyBoxWidth / 2}
+          y={-jerseyBoxHeight / 2}
+          width={jerseyBoxWidth}
+          height={jerseyBoxHeight}
+          listening={false}
+        />
+      ) : null}
+      {hasBallRing ? (
+        <Circle
+          radius={ballRingRadius}
+          fill="transparent"
+          stroke={ballStrokeColor}
+          strokeWidth={ballStroke}
+          strokeScaleEnabled={false}
+          listening={false}
+        />
+      ) : null}
+      {object.kind === "cone" ? (
+        <ConeMarker scale={Math.max(0.45, radius / 18)} />
+      ) : null}
+      {object.kind === "text" ? (
+        <Text
+          text={object.label ?? "Text"}
+          fontSize={fontSize}
+          fill={OBJECT_COLORS.text}
+          fontStyle="bold"
+          offsetX={fontSize * 0.8}
+          offsetY={fontSize * 0.4}
+          listening={false}
+        />
+      ) : null}
+      {object.kind === "label" ? (
+        <Text
+          text={object.label ?? "T"}
+          fontSize={fontSize * 1.1}
+          fill={OBJECT_COLORS.label}
+          fontStyle="bold"
+          offsetX={fontSize * 0.25}
+          offsetY={fontSize * 0.45}
+          listening={false}
+        />
+      ) : null}
+      {object.kind === "flag" ? (
+        <Group listening={false}>
+          <Line points={[0, -radius * 0.8, 0, radius * 0.8]} stroke="#64748b" strokeWidth={2} />
+          <Line
+            points={[0, -radius * 0.7, radius * 0.9, -radius * 0.45, 0, -radius * 0.2]}
+            closed
+            fill="#94a3b8"
+            stroke="#64748b"
+            strokeWidth={1}
+          />
+        </Group>
+      ) : null}
+      {object.kind === "shadow" && court ? (
+        <ShadowMarker
+          type={object.shadowType ?? "rect"}
+          court={court}
+          scaleX={object.scaleX ?? 1}
+          scaleY={object.scaleY ?? 1}
+        />
+      ) : null}
+      {object.kind === "zone" && court ? (
+        <ZoneMarker
+          type={object.zoneType ?? "paint"}
+          court={court}
+          scaleX={object.scaleX ?? 1}
+          scaleY={object.scaleY ?? 1}
+        />
+      ) : null}
+      {selected && isGuardDefense ? (
+        <Circle
+          x={0}
+          y={0}
+          radius={guardHitRadius(ringRadius)}
+          stroke="#64748b"
+          strokeWidth={markerStroke}
+          dash={[5, 4]}
+          fill="transparent"
+          listening={false}
+        />
+      ) : null}
+      {selected && isGuardDefense && !compact ? (
+        <GuardRotationHandleLocal
+          objectId={object.id}
+          ringRadius={ringRadius}
+          rotation={guardRotation}
+        />
+      ) : null}
+      {selected && isPlayer && !showCircleRing && !hasBallRing && !isGuardDefense ? (
+        <Circle
+          x={0}
+          y={0}
+          radius={radius}
+          stroke="#64748b"
+          strokeWidth={markerStroke}
+          dash={[5, 4]}
+          fill="transparent"
+          listening={false}
+        />
+      ) : null}
+      {selected && (object.kind === "shadow" || object.kind === "zone") ? (
+        <Circle
+          x={0}
+          y={0}
+          radius={Math.max(radius * 1.8, 18)}
+          stroke="#111111"
+          strokeWidth={2}
+          dash={[5, 4]}
+          listening={false}
+        />
+      ) : null}
+    </Group>
+  );
+}

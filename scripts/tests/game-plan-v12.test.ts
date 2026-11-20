@@ -3,8 +3,8 @@ import {
   createRematchGamePlan,
   findOpponentHistory,
   normalizeOpponentKey,
-} from "../../src/lib/game-plan/opponent-history";
-import type { GamePlan } from "../../src/types/library-meta";
+} from "../../src/features/game-plan/lib/opponent-history";
+import type { GamePlan } from "../../src/features/library/model/library-meta";
 
 const now = "2026-06-30T12:00:00.000Z";
 

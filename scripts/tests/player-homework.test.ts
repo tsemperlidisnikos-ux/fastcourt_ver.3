@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { buildHomeworkFromGamePlan } from "../../src/lib/game-plan/player-homework";
-import type { GamePlan } from "../../src/types/library-meta";
+import { buildHomeworkFromGamePlan } from "../../src/features/game-plan/lib/player-homework";
+import type { GamePlan } from "../../src/features/library/model/library-meta";
 
 const plan: GamePlan = {
   id: "gp1",

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { formatActionTimelineLabel } from "../../src/lib/designer/action-timeline-label.ts";
-import type { DesignerAction, DesignerFrame } from "../../src/types/designer.ts";
+import { formatActionTimelineLabel } from "../../src/features/designer/lib/action-timeline-label.ts";
+import type { DesignerAction, DesignerFrame } from "../../src/features/designer/model/designer.ts";
 
 function frameWithPlayers(): DesignerFrame {
   return {

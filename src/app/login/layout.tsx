@@ -1,4 +1,4 @@
-import "@/styles/welcome.css";
+import "@/shared/styles/welcome.css";
 
 export default function LoginLayout({
   children,

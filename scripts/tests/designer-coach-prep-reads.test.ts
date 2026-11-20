@@ -5,8 +5,8 @@ import {
   formatPrepReadCoachNotes,
   prepReadMatchesCurrentPlay,
   prioritizePrepReadsForPlay,
-} from "../../src/lib/designer/designer-coach-prep-reads";
-import type { GamePlan, PracticeSession } from "../../src/types/library-meta";
+} from "../../src/features/designer/lib/designer-coach-prep-reads";
+import type { GamePlan, PracticeSession } from "../../src/features/library/model/library-meta";
 
 const plan: GamePlan = {
   id: "gp1",

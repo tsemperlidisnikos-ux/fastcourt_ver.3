@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import {
   buildDesignerCoachLibraryContext,
   mergeAiGroundedAlternatives,
-} from "../../src/lib/designer/designer-coach-library-context";
-import { parseDesignerCoachPayload } from "../../src/lib/designer/designer-coach-prompt";
-import type { StoredPlay } from "../../src/types/library";
+} from "../../src/features/designer/lib/designer-coach-library-context";
+import { parseDesignerCoachPayload } from "../../src/features/designer/lib/designer-coach-prompt";
+import type { StoredPlay } from "../../src/features/library/model/library";
 
 const current = {
   id: "current",

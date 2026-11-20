@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import {
   blankStoredPlay,
   storedPlayToLibraryItem,
-} from "@/lib/library/convert";
+} from "@/features/library/lib/convert";
 
 describe("library play model", () => {
   it("blankStoredPlay creates one empty frame", () => {

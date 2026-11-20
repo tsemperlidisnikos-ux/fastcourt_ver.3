@@ -5,8 +5,8 @@ import {
   nextPossessionPlaylistIndex,
   possessionPlaylistIndexAtTime,
   prevPossessionPlaylistIndex,
-} from "../../src/lib/film-room/film-possession-playlist.ts";
-import { createFilmBookmark } from "../../src/lib/film-room/film-room-bookmarks.ts";
+} from "../../src/features/film-room/lib/film-possession-playlist.ts";
+import { createFilmBookmark } from "../../src/features/film-room/lib/film-room-bookmarks.ts";
 
 describe("film-possession-playlist", () => {
   it("builds sorted playlist from bookmarks", () => {

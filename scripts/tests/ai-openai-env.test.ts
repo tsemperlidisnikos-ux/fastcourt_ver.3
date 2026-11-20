@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { isOpenAiConfigured } from "../../src/lib/ai/env.ts";
+import { isOpenAiConfigured } from "../../src/shared/lib/ai/env.ts";
 
 test("isOpenAiConfigured rejects placeholder keys", () => {
   const original = process.env.OPENAI_API_KEY;

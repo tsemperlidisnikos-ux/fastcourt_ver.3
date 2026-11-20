@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import {
   formatPracticeLiveCall,
   resolvePracticeDisruptionCue,
-} from "../../src/lib/practice/practice-disruption-cue.ts";
+} from "../../src/features/practice/lib/practice-disruption-cue.ts";
 
 describe("practice-disruption-cue", () => {
   it("prefers structured liveCall over parsed notes", () => {

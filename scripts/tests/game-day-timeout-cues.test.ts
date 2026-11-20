@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createGamePlanDraft } from "../../src/lib/game-plan/game-plan-items.ts";
+import { createGamePlanDraft } from "../../src/features/game-plan/lib/game-plan-items.ts";
 import {
   TIMEOUT_CUES_MAX,
   addTimeoutCue,
@@ -12,9 +12,9 @@ import {
   pickTopTimeoutCues,
   removeTimeoutCue,
   timeoutCueFromCounterLibraryPlay,
-} from "../../src/lib/game-plan/game-day-timeout-cues.ts";
-import { buildTimeoutViewSlides } from "../../src/lib/game-plan/timeout-mode.ts";
-import type { StoredPlay } from "../../src/types/library.ts";
+} from "../../src/features/game-plan/lib/game-day-timeout-cues.ts";
+import { buildTimeoutViewSlides } from "../../src/features/game-plan/lib/timeout-mode.ts";
+import type { StoredPlay } from "../../src/features/library/model/library.ts";
 
 function stubPlay(id: string, title: string): StoredPlay {
   return {

@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { buildDrillSuggestions } from "../../src/lib/practice/drill-suggestions.ts";
+import { buildDrillSuggestions } from "../../src/features/practice/lib/drill-suggestions.ts";
 import {
   buildPossessionReelManifest,
   formatPossessionReelCutList,
-} from "../../src/lib/film-room/possession-reel-export.ts";
-import { buildPossessionPlaylist } from "../../src/lib/film-room/film-possession-playlist.ts";
-import { createFilmBookmark } from "../../src/lib/film-room/film-room-bookmarks.ts";
+} from "../../src/features/film-room/lib/possession-reel-export.ts";
+import { buildPossessionPlaylist } from "../../src/features/film-room/lib/film-possession-playlist.ts";
+import { createFilmBookmark } from "../../src/features/film-room/lib/film-room-bookmarks.ts";
 
 describe("drill-suggestions", () => {
   it("suggests extra blocks for high miss-rate reads", () => {

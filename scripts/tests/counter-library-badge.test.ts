@@ -6,7 +6,7 @@ import {
   formatCounterLibraryBadgeLabel,
   formatCounterLibraryBadgeTitle,
   isCounterLibraryItem,
-} from "../../src/lib/library/counter-library-badge.ts";
+} from "../../src/features/library/lib/counter-library-badge.ts";
 
 test("counter library badge helpers", () => {
   assert.equal(isCounterLibraryItem({ defenseCounter: { enabled: true, coverages: [], vsPatterns: [] } }), true);

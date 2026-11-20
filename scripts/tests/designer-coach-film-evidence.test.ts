@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { filterCoachFilmEvidence } from "../../src/lib/designer/designer-coach-film-evidence";
-import type { GamePlan } from "../../src/types/library-meta";
+import { filterCoachFilmEvidence } from "../../src/features/designer/lib/designer-coach-film-evidence";
+import type { GamePlan } from "../../src/features/library/model/library-meta";
 
 const plan: GamePlan = {
   id: "gp-1",

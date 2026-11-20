@@ -4,7 +4,7 @@ import {
   clampShuttlePosition,
   defaultShuttlePosition,
   SHUTTLE_WHEEL_SIZE_PX,
-} from "@/lib/film-room/shuttle-position";
+} from "@/features/film-room/lib/shuttle-position";
 
 describe("film room shuttle position", () => {
   it("clamps widget inside bounds", () => {

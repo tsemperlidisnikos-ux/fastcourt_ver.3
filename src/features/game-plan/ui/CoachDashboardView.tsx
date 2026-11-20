@@ -1,0 +1,412 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useCountersDemo } from "@/features/demo/hooks/useCountersDemo";
+import {
+  buildCoachDashboardModel,
+  COACH_SEASON_TREND_SESSIONS,
+  coachTrendBarHeight,
+  findRecentPracticeSessionForDrill,
+  practiceSessionLibraryHref,
+} from "@/features/game-plan/lib/coach/coach-dashboard";
+import { buildCounterSuccessModel } from "@/features/game-plan/lib/coach/counter-success";
+import { getAllRosterPlayers } from "@/features/players/lib/player-roster";
+import { createDrillPracticeItems } from "@/features/practice/lib/drill-suggestions";
+import { useFilmRoomStore } from "@/features/film-room/model/film-room-store";
+import { useOrganizerStore } from "@/features/library/model/organizer-store";
+import { appNotice } from "@/shared/model/dialog-store";
+
+export function CoachDashboardView() {
+  const router = useRouter();
+  const { openDemo: openCountersDemo } = useCountersDemo();
+  const practiceSessions = useOrganizerStore((s) => s.practiceSessions);
+  const plays = useOrganizerStore((s) => s.plays);
+  const teams = useOrganizerStore((s) => s.teams);
+  const gamePlans = useOrganizerStore((s) => s.gamePlans);
+  const createPracticeSession = useOrganizerStore((s) => s.createPracticeSession);
+  const appendPracticeItems = useOrganizerStore((s) => s.appendPracticeItems);
+  const filmSessions = useFilmRoomStore((s) => s.sessions);
+  const filmHydrated = useFilmRoomStore((s) => s.hydrated);
+  const loadFilmSessions = useFilmRoomStore((s) => s.load);
+
+  useEffect(() => {
+    if (!filmHydrated) void loadFilmSessions();
+  }, [filmHydrated, loadFilmSessions]);
+
+  const [teamFilter, setTeamFilter] = useState("");
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [rosterTick, setRosterTick] = useState(0);
+
+  useEffect(() => {
+    function onStorage(event: StorageEvent) {
+      if (event.key?.includes("fastcourt_playerRoster")) {
+        setRosterTick((value) => value + 1);
+      }
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  const rosterPlayers = useMemo(() => {
+    void rosterTick;
+    return getAllRosterPlayers();
+  }, [rosterTick]);
+
+  const model = useMemo(
+    () =>
+      buildCoachDashboardModel({
+        practiceSessions,
+        filmSessions,
+        plays,
+        origin: typeof window !== "undefined" ? window.location.origin : "",
+        teamFilter: teamFilter || undefined,
+        rosterPlayers,
+      }),
+    [practiceSessions, filmSessions, plays, teamFilter, rosterPlayers],
+  );
+
+  const counterSuccess = useMemo(() => {
+    const team = teamFilter.trim();
+    const sessions = team
+      ? practiceSessions.filter((row) => row.team === team)
+      : practiceSessions;
+    const plans = team
+      ? gamePlans.filter((row) => row.team === team)
+      : gamePlans;
+    return buildCounterSuccessModel(sessions, plans, 8);
+  }, [practiceSessions, gamePlans, teamFilter]);
+
+  const markedTrend = model.practiceTrend.filter(
+    (row) => row.landedCount + row.missedCount > 0,
+  );
+  const seasonTrend = model.seasonTrend.filter(
+    (row) => row.landedCount + row.missedCount > 0,
+  );
+
+  const filteredPracticeSessions = useMemo(() => {
+    const team = teamFilter.trim();
+    return team
+      ? practiceSessions.filter((row) => row.team === team)
+      : practiceSessions;
+  }, [practiceSessions, teamFilter]);
+
+  async function applyDrillSuggestion(suggestionId: string) {
+    const suggestion = model.drillSuggestions.find((row) => row.id === suggestionId);
+    if (!suggestion) return;
+    setBusyId(suggestionId);
+    try {
+      const session = await createPracticeSession();
+      const items = createDrillPracticeItems(suggestion);
+      const added = await appendPracticeItems(session.id, items);
+      await useOrganizerStore.getState().updatePracticeSession(session.id, {
+        title: `Drill — ${suggestion.call}`,
+        notes: suggestion.reason,
+      });
+      appNotice(
+        "Drill blocks added",
+        `Added ${added} block${added === 1 ? "" : "s"} to new practice session.`,
+      );
+      router.push(practiceSessionLibraryHref(session.id));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  return (
+    <div className="coach-dashboard" id="coach-dashboard">
+      <header className="coach-dashboard-head">
+        <div>
+          <h2 className="coach-dashboard-title">Coach dashboard</h2>
+          <p className="coach-dashboard-sub">
+            Film disruption reads + practice outcomes in one place (Copilot Step 8–9).
+          </p>
+        </div>
+        {teams.length > 1 ? (
+          <label className="coach-dashboard-team-filter">
+            <span>Team</span>
+            <select
+              value={teamFilter}
+              onChange={(event) => setTeamFilter(event.target.value)}
+            >
+              <option value="">All teams</option>
+              {teams.map((team) => (
+                <option key={team} value={team}>
+                  {team}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+        <button
+          type="button"
+          className="fc-counters-demo-open-btn"
+          onClick={openCountersDemo}
+          title="Full counters walkthrough with demo data"
+        >
+          Counters demo
+        </button>
+      </header>
+
+      <div className="coach-dashboard-grid">
+        <section className="coach-dashboard-card coach-dashboard-read-rate">
+          <h3>Practice read success</h3>
+          {model.overallReadRatePct != null ? (
+            <>
+              <p className="coach-dashboard-big-stat">{model.overallReadRatePct}%</p>
+              <p className="coach-dashboard-stat-meta">
+                {model.totalLanded} landed · {model.totalMissed} missed
+              </p>
+            </>
+          ) : (
+            <p className="coach-dashboard-empty">
+              Mark Landed / Missed in Practice Live to start tracking.
+            </p>
+          )}
+          {markedTrend.length ? (
+            <div className="coach-dashboard-trend" aria-label="Read success trend">
+              {markedTrend.map((row) => (
+                <div key={row.sessionId} className="coach-dashboard-trend-col">
+                  <div
+                    className="coach-dashboard-trend-bar"
+                    style={{ height: `${coachTrendBarHeight(row.successRatePct)}%` }}
+                    title={
+                      row.successRatePct != null
+                        ? `${row.successRatePct}%`
+                        : "No marks yet"
+                    }
+                  />
+                  <span className="coach-dashboard-trend-label">
+                    {(row.title || row.date).slice(0, 8)}
+                  </span>
+                  <Link
+                    href={practiceSessionLibraryHref(row.sessionId)}
+                    className="coach-dashboard-open-link"
+                    title={`Open ${row.title || row.date} in Practice`}
+                  >
+                    Practice
+                  </Link>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </section>
+
+        <section className="coach-dashboard-card coach-dashboard-season">
+          <h3>Season trend ({COACH_SEASON_TREND_SESSIONS} sessions)</h3>
+          {seasonTrend.length ? (
+            <>
+              <div
+                className="coach-dashboard-trend coach-dashboard-season-trend"
+                aria-label="Season read success trend"
+              >
+                {[...seasonTrend].reverse().map((row) => (
+                  <div key={row.sessionId} className="coach-dashboard-trend-col">
+                    <div
+                      className="coach-dashboard-trend-bar"
+                      style={{ height: `${coachTrendBarHeight(row.successRatePct)}%` }}
+                      title={
+                        row.successRatePct != null
+                          ? `${row.title || row.date}: ${row.successRatePct}%`
+                          : row.title || row.date
+                      }
+                    />
+                    <span className="coach-dashboard-trend-label">
+                      {row.date.slice(5)}
+                    </span>
+                    <Link
+                      href={practiceSessionLibraryHref(row.sessionId)}
+                      className="coach-dashboard-open-link"
+                      title={`Open ${row.title || row.date} in Practice`}
+                    >
+                      Practice
+                    </Link>
+                  </div>
+                ))}
+              </div>
+              <p className="coach-dashboard-stat-meta">
+                Oldest ← → newest · {seasonTrend.length} marked session
+                {seasonTrend.length === 1 ? "" : "s"}
+              </p>
+            </>
+          ) : (
+            <p className="coach-dashboard-empty">
+              Need marked reads across multiple practice sessions.
+            </p>
+          )}
+        </section>
+
+        <section className="coach-dashboard-card coach-dashboard-players">
+          <h3>Player read attribution</h3>
+          {model.playerAttribution.players.length ? (
+            <>
+              <ul className="coach-dashboard-player-list">
+                {model.playerAttribution.players.map((row) => (
+                  <li key={row.playerId} className="coach-dashboard-player-row">
+                    <span className="coach-dashboard-player-name">{row.playerName}</span>
+                    <span className="coach-dashboard-player-stats">
+                      {row.successRatePct != null ? `${row.successRatePct}%` : "—"} ·{" "}
+                      {row.landed}✓ {row.missed}✗
+                    </span>
+                    {row.topCalls.length ? (
+                      <span className="coach-dashboard-player-calls">
+                        {row.topCalls.join(", ")}
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+              {model.playerAttribution.unattributedLanded +
+                model.playerAttribution.unattributedMissed >
+              0 ? (
+                <p className="coach-dashboard-stat-meta">
+                  {model.playerAttribution.unattributedLanded} landed ·{" "}
+                  {model.playerAttribution.unattributedMissed} missed without player
+                </p>
+              ) : null}
+            </>
+          ) : (
+            <p className="coach-dashboard-empty">
+              Assign players in Practice Live when marking reads.
+            </p>
+          )}
+        </section>
+
+        <section className="coach-dashboard-card coach-dashboard-counters">
+          <h3>Counter success</h3>
+          {counterSuccess.overallRatePct != null ? (
+            <>
+              <p className="coach-dashboard-big-stat">
+                {counterSuccess.overallRatePct}%
+              </p>
+              <p className="coach-dashboard-stat-meta">
+                {counterSuccess.totalLanded} landed · {counterSuccess.totalMissed}{" "}
+                missed · {counterSuccess.practicedCueCount} practiced
+                {counterSuccess.pendingCueCount
+                  ? ` · ${counterSuccess.pendingCueCount} timeout cues not drilled`
+                  : ""}
+              </p>
+            </>
+          ) : (
+            <p className="coach-dashboard-empty">
+              Add counters to practice from Designer Coach, then mark Landed /
+              Missed in Practice Live.
+            </p>
+          )}
+          {counterSuccess.rows.length ? (
+            <ul className="coach-dashboard-counter-list">
+              {counterSuccess.rows.map((row) => (
+                <li key={row.id} className="coach-dashboard-counter-row">
+                  <div className="coach-dashboard-counter-main">
+                    <strong>{row.call}</strong>
+                    {row.targetsPattern || row.coverage ? (
+                      <span className="coach-dashboard-counter-meta">
+                        {[
+                          row.coverage,
+                          row.targetsPattern
+                            ? `vs ${row.targetsPattern}`
+                            : null,
+                          row.gamePlanTitle,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </span>
+                    ) : null}
+                  </div>
+                  <span className="coach-dashboard-counter-stats">
+                    {row.successRatePct != null
+                      ? `${row.successRatePct}%`
+                      : row.source === "timeout-cue"
+                        ? "Not drilled"
+                        : "—"}
+                    {row.landed + row.missed > 0
+                      ? ` · ${row.landed}✓ ${row.missed}✗`
+                      : ""}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </section>
+
+        <section className="coach-dashboard-card coach-dashboard-film">
+          <h3>Film evaluation</h3>
+          {model.filmSessions.length ? (
+            <ul className="coach-dashboard-film-list">
+              {model.filmSessions.map((row) => (
+                <li key={row.sessionId}>
+                  <Link href={row.link.replace(/^https?:\/\/[^/]+/, "")}>
+                    {row.title}
+                  </Link>
+                  <span>
+                    {row.evaluation.disruptionDetectedCount}/
+                    {row.evaluation.analyzedCount} disrupted
+                    {row.evaluation.disruptionRatePct != null
+                      ? ` · ${row.evaluation.disruptionRatePct}%`
+                      : ""}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="coach-dashboard-empty">
+              Run Analyze clip or batch analyze in Film Room.
+            </p>
+          )}
+        </section>
+
+        <section className="coach-dashboard-card coach-dashboard-drills">
+          <h3>Drill suggestions</h3>
+          {model.drillSuggestions.length ? (
+            <ul className="coach-dashboard-drill-list">
+              {model.drillSuggestions.map((row) => {
+                const sourceSession = findRecentPracticeSessionForDrill(
+                  filteredPracticeSessions,
+                  row.call,
+                  row.playId,
+                );
+                return (
+                <li key={row.id} className="coach-dashboard-drill-row">
+                  <div className="coach-dashboard-drill-main">
+                    <strong>{row.call}</strong>
+                    {row.playTitle ? (
+                      <span className="coach-dashboard-drill-play">{row.playTitle}</span>
+                    ) : null}
+                    <p>{row.reason}</p>
+                  </div>
+                  <div className="coach-dashboard-drill-actions">
+                    <button
+                      type="button"
+                      className="coach-dashboard-drill-btn"
+                      disabled={busyId === row.id}
+                      onClick={() => void applyDrillSuggestion(row.id)}
+                    >
+                      {busyId === row.id
+                        ? "Adding…"
+                        : `Add ${row.suggestedBlocks} block${row.suggestedBlocks === 1 ? "" : "s"}`}
+                    </button>
+                    {sourceSession ? (
+                      <Link
+                        href={practiceSessionLibraryHref(sourceSession.id)}
+                        className="coach-dashboard-open-link"
+                        title={`Open source session: ${sourceSession.title}`}
+                      >
+                        Open in Practice
+                      </Link>
+                    ) : null}
+                  </div>
+                </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className="coach-dashboard-empty">
+              Needs 2+ missed reads at 40%+ miss rate across recent sessions.
+            </p>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+}

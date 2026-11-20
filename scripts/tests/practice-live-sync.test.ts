@@ -3,9 +3,9 @@ import { describe, it } from "node:test";
 import {
   createPracticeLiveSyncToken,
   ensurePracticeLiveSyncToken,
-} from "../../src/lib/practice/practice-live-cloud.ts";
-import { encodePracticePayload } from "../../src/lib/share/share-link.ts";
-import type { PracticeSession } from "../../src/types/library-meta.ts";
+} from "../../src/features/practice/lib/practice-live-cloud.ts";
+import { encodePracticePayload } from "../../src/features/share/lib/share-link.ts";
+import type { PracticeSession } from "../../src/features/library/model/library-meta.ts";
 
 const session: PracticeSession = {
   id: "prac_live_1",

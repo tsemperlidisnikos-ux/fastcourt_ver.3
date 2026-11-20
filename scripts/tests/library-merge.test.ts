@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { mergePlaysByUpdatedAt } from "../../src/lib/cloud/merge-plays";
-import type { StoredPlay } from "../../src/types/library";
+import { mergePlaysByUpdatedAt } from "../../src/shared/lib/cloud/merge-plays";
+import type { StoredPlay } from "../../src/features/library/model/library";
 
 function play(id: string, updatedAt: string): StoredPlay {
   return {

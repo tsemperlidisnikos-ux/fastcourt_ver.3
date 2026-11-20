@@ -1,4 +1,4 @@
-import { AppShell } from "@/components/shell/AppShell";
+import { AppShell } from "@/shared/ui/shell/AppShell";
 
 export const dynamic = "force-dynamic";
 

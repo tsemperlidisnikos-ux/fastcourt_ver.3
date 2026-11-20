@@ -5,7 +5,7 @@ import {
   isDesignerCoachEnabled,
   isSimilarPlaysEnabled,
   normalizePlatformFeatures,
-} from "../../src/lib/settings/platform-features.ts";
+} from "../../src/features/settings/lib/platform-features.ts";
 
 describe("platform features", () => {
   it("defaults similar plays and designer coach on", () => {

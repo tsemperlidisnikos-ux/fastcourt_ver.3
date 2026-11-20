@@ -5,7 +5,7 @@ import {
   mergeSubscriptionExpiry,
   stripePeriodEndToIso,
   subscriptionPeriodEndUnix,
-} from "../../src/lib/billing/stripe-access.ts";
+} from "../../src/features/billing/lib/stripe-access.ts";
 
 describe("stripe access helpers", () => {
   it("converts unix period end to ISO", () => {

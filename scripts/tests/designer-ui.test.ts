@@ -11,7 +11,7 @@ function read(rel: string) {
 }
 
 describe("designer screen wiring", () => {
-  const designerSrc = read("src/components/designer/DesignerScreen.tsx");
+  const designerSrc = read("src/features/designer/ui/DesignerScreen.tsx");
 
   it("exposes frame toolbar controls", () => {
     for (const id of [
@@ -30,12 +30,12 @@ describe("designer screen wiring", () => {
   });
 
   it("notes editor has fixed height in CSS", () => {
-    const css = read("src/styles/fastdraw-editor-ui.css");
+    const css = read("src/features/designer/styles/fastdraw-editor-ui.css");
     assert.match(css, /notes-editor-main[\s\S]*height:\s*200px/);
   });
 
   it("modal buttons use black text in designer base CSS", () => {
-    const css = read("src/styles/fc-designer-base.css");
+    const css = read("src/features/designer/styles/fc-designer-base.css");
     assert.match(css, /\.modal-create[\s\S]*color:\s*#000/);
     assert.match(css, /\.modal-cancel[\s\S]*color:\s*#000/);
   });

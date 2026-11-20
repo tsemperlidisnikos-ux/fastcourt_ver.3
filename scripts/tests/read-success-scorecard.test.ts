@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { buildGamePlanReadRollup } from "../../src/lib/game-plan/game-plan-read-rollup.ts";
+import { buildGamePlanReadRollup } from "../../src/features/game-plan/lib/game-plan-read-rollup.ts";
 import {
   buildPracticeReadScorecard,
   buildPracticeReadTrend,
   isReadTrackableItem,
-} from "../../src/lib/practice/read-success-scorecard.ts";
-import { buildFilmSessionEvaluation } from "../../src/lib/film-room/film-read-evaluation.ts";
-import type { PracticeSession } from "../../src/types/library-meta.ts";
+} from "../../src/features/practice/lib/read-success-scorecard.ts";
+import { buildFilmSessionEvaluation } from "../../src/features/film-room/lib/film-read-evaluation.ts";
+import type { PracticeSession } from "../../src/features/library/model/library-meta.ts";
 
 describe("read-success-scorecard", () => {
   it("detects trackable disruption read items", () => {

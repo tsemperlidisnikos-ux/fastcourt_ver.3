@@ -3,7 +3,7 @@ import {
   filterByTombstones,
   isLibraryItemTombstoned,
   mergeLibraryTombstones,
-} from "../../src/lib/cloud/merge-tombstones";
+} from "../../src/shared/lib/cloud/merge-tombstones";
 
 const merged = mergeLibraryTombstones(
   [{ id: "a", kind: "play", deletedAt: "2026-06-19T12:00:00.000Z" }],

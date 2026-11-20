@@ -4,7 +4,7 @@ import {
   angleDeltaToSeekSeconds,
   clampSeekTime,
   normalizeAngleDelta,
-} from "@/lib/film-room/shuttle-wheel";
+} from "@/features/film-room/lib/shuttle-wheel";
 
 describe("film room shuttle wheel", () => {
   it("normalizes angle wraparound", () => {

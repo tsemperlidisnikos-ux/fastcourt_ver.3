@@ -4,8 +4,8 @@ import {
   mergeTeamOrganizations,
   removedTeamOrganizationIds,
   stampChangedTeamOrganizations,
-} from "../../src/lib/cloud/merge-team-orgs.ts";
-import { newOrganization } from "../../src/lib/auth/team-organizations.ts";
+} from "../../src/shared/lib/cloud/merge-team-orgs.ts";
+import { newOrganization } from "../../src/features/auth/lib/team-organizations.ts";
 
 describe("team org cloud merge", () => {
   it("keeps the newer updatedAt copy", () => {

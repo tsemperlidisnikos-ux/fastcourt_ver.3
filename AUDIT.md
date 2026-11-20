@@ -25,11 +25,11 @@
 | Layer | Location | Notes |
 |-------|----------|-------|
 | Routes | `src/app/` | Landing, login, library, designer, settings, Stripe webhook |
-| Designer | `src/components/designer/`, `src/stores/designer/` | Konva canvas; store split into slices + helpers |
-| Library | `src/components/library/`, `src/stores/library-store.ts` | IndexedDB-first plays, playbooks, practice |
-| Cloud sync | `src/lib/cloud/` | Merge plays/meta/tombstones; Supabase persistence |
-| Auth | `src/lib/auth/`, `src/stores/auth-store.ts` | Local + Supabase OAuth |
-| Billing | Stripe webhook + `src/lib/billing/` | Subscription UI + admin config |
+| Designer | `src/features/designer/ui/`, `src/stores/designer/` | Konva canvas; store split into slices + helpers |
+| Library | `src/features/library/ui/`, `src/features/library/model/library-store.ts` | IndexedDB-first plays, playbooks, practice |
+| Cloud sync | `src/shared/lib/cloud/` | Merge plays/meta/tombstones; Supabase persistence |
+| Auth | `src/features/auth/lib/`, `src/features/auth/model/auth-store.ts` | Local + Supabase OAuth |
+| Billing | Stripe webhook + `src/features/billing/lib/` | Subscription UI + admin config |
 | Tests | `scripts/tests/` (37 files), `e2e/app-smoke.spec.ts` | Domain map in `scripts/check-config.mjs` |
 
 ---
@@ -50,8 +50,8 @@
 | **Settings — Team Admin** | Mostly done | Org members, branding; some org data still localStorage |
 | **Settings — Admin** | Mostly done | Users, orgs, billing, appearance preview |
 | **Cloud sync — settings** | Done | `user_settings` (migration 002) |
-| **Cloud sync — library** | Mostly done | `src/lib/cloud/` + migrations 004–007; needs production smoke test |
-| **PlayBank** | Missing | Placeholder only (`src/components/playbank/.gitkeep`) |
+| **Cloud sync — library** | Mostly done | `src/shared/lib/cloud/` + migrations 004–007; needs production smoke test |
+| **PlayBank** | Missing | Placeholder only (`src/features/playbank/ui/.gitkeep`) |
 | **PWA / offline** | Mostly done | Manifest, service worker, install banners, offline shell; full offline needs prior visit cache |
 | **Share links** | Done | LZ hash URLs |
 

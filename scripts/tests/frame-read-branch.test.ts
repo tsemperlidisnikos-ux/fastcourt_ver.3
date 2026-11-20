@@ -5,8 +5,8 @@ import {
   frameThumbBadge,
   isReadFrame,
   primaryFrameLabel,
-} from "../../src/lib/designer/frame-read-branch.ts";
-import type { DesignerFrame } from "../../src/types/designer.ts";
+} from "../../src/features/designer/lib/frame-read-branch.ts";
+import type { DesignerFrame } from "../../src/features/designer/model/designer.ts";
 
 describe("frame-read-branch", () => {
   const primary: DesignerFrame = {

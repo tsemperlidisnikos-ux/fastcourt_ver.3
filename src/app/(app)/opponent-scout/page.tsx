@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { OpponentScoutScreen } from "@/components/opponent-scout/OpponentScoutScreen";
+import { OpponentScoutScreen } from "@/features/opponent-scout/ui/OpponentScoutScreen";
 
 export default function OpponentScoutPage() {
   return (

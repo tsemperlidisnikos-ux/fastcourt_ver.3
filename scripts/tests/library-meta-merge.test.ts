@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mergeOrganizerMeta } from "../../src/lib/cloud/merge-meta";
+import { mergeOrganizerMeta } from "../../src/shared/lib/cloud/merge-meta";
 
 const merged = mergeOrganizerMeta(
   {

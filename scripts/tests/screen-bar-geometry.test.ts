@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import {
   actionToStagePoints,
   screenBarPointsFromPolyline,
-} from "@/lib/designer/action-geometry";
-import type { DesignerAction } from "@/types/designer";
+} from "@/features/designer/lib/action-geometry";
+import type { DesignerAction } from "@/features/designer/model/designer";
 
 function makeScreen(
   x1: number,

@@ -4,8 +4,8 @@ import {
   resolvePdfCoverSubtitle,
   resolvePdfCoverTeam,
   resolvePdfFooterText,
-} from "../../src/lib/settings/pdf-brand-export.ts";
-import { DEFAULT_PDF_BRAND } from "../../src/lib/settings/pdf-branding.ts";
+} from "../../src/features/settings/lib/pdf-brand-export.ts";
+import { DEFAULT_PDF_BRAND } from "../../src/features/settings/lib/pdf-branding.ts";
 
 describe("pdf brand export", () => {
   const brand = {

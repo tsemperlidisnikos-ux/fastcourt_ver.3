@@ -4,8 +4,8 @@ import {
   isStrokeVisibleAt,
   LASER_HOLD_SEC,
   visibleStrokesAt,
-} from "@/lib/film-room/annotation-visibility";
-import type { VideoAnnotationStroke } from "@/types/film-room";
+} from "@/features/film-room/lib/annotation-visibility";
+import type { VideoAnnotationStroke } from "@/features/film-room/model/film-room";
 
 function stroke(
   partial: Partial<VideoAnnotationStroke> & Pick<VideoAnnotationStroke, "time" | "kind">,

@@ -3,10 +3,11 @@ const { parse } = require("url");
 const next = require("next");
 const { existsSync } = require("fs");
 const { join } = require("path");
+const { attachPracticeLiveWs } = require("./scripts/practice-live-ws-attach.cjs");
 
 const hostname = process.env.HOSTNAME || "0.0.0.0";
 const port = parseInt(process.env.PORT || "3000", 10);
-// Plesk startup file — always serve the production build (never `next dev`).
+// Railway / Plesk / production entry — always serve the production build.
 const dev = false;
 
 const buildIdPath = join(__dirname, ".next", "BUILD_ID");
@@ -27,8 +28,8 @@ if (
 ) {
   console.warn(
     "[FastCourt] Supabase env vars are missing or still placeholders. " +
-      "Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Plesk, " +
-      "then run `npm run build` again so they are embedded in the client bundle.",
+      "Cloud auth/sync will be off until NEXT_PUBLIC_SUPABASE_URL and " +
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY are set, then rebuild.",
   );
 }
 
@@ -36,7 +37,7 @@ const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
-  createServer(async (req, res) => {
+  const httpServer = createServer(async (req, res) => {
     try {
       const parsedUrl = parse(req.url, true);
       await handle(req, res, parsedUrl);
@@ -45,7 +46,12 @@ app.prepare().then(() => {
       res.statusCode = 500;
       res.end("Internal server error");
     }
-  }).listen(port, hostname, () => {
+  });
+
+  attachPracticeLiveWs(httpServer, { path: "/practice-live" });
+
+  httpServer.listen(port, hostname, () => {
     console.log(`FastCourt ready on http://${hostname}:${port}`);
+    console.log(`Practice Live WS on ws://${hostname}:${port}/practice-live`);
   });
 });

@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import {
   consumeRateLimit,
   resetRateLimitBucketsForTests,
-} from "../../src/lib/ai/rate-limit.ts";
+} from "../../src/shared/lib/ai/rate-limit.ts";
 
 describe("AI rate limit", () => {
   it("allows requests under the limit then blocks", () => {

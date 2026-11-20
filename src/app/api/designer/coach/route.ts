@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import { isOpenAiConfigured, getOpenAiApiKey } from "@/lib/ai/env";
-import { AI_COACH_RATE_LIMIT } from "@/lib/ai/rate-limit";
-import { requireAiCaller } from "@/lib/ai/require-ai-caller";
+import { isOpenAiConfigured, getOpenAiApiKey } from "@/shared/lib/ai/env";
+import { AI_COACH_RATE_LIMIT } from "@/shared/lib/ai/rate-limit";
+import { requireAiCaller } from "@/shared/lib/ai/require-ai-caller";
 import {
   buildDesignerCoachPrompt,
   parseDesignerCoachPayload,
   type DesignerCoachRequest,
-} from "@/lib/designer/designer-coach-prompt";
-import { emptyCoachingRecommendations } from "@/lib/film-room/film-coaching-format";
-import type { DesignerFrame } from "@/types/designer";
+} from "@/features/designer/lib/designer-coach-prompt";
+import { emptyCoachingRecommendations } from "@/features/film-room/lib/film-coaching-format";
+import type { DesignerFrame } from "@/features/designer/model/designer";
 
 export const runtime = "nodejs";
 

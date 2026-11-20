@@ -5,10 +5,10 @@ import {
   defaultFilmBookmarkLabel,
   normalizeFilmBookmarks,
   sortFilmBookmarks,
-} from "../../src/lib/film-room/film-room-bookmarks.ts";
-import { normalizeFilmRoomSession } from "../../src/lib/film-room/film-room-session.ts";
-import { buildFilmScoutPrintModelFromSession } from "../../src/lib/film-room/film-scout-print-model.ts";
-import type { FilmRoomSession } from "../../src/types/film-room.ts";
+} from "../../src/features/film-room/lib/film-room-bookmarks.ts";
+import { normalizeFilmRoomSession } from "../../src/features/film-room/lib/film-room-session.ts";
+import { buildFilmScoutPrintModelFromSession } from "../../src/features/film-room/lib/film-scout-print-model.ts";
+import type { FilmRoomSession } from "../../src/features/film-room/model/film-room.ts";
 
 describe("film room bookmarks", () => {
   it("creates default chapter labels from playhead time", () => {

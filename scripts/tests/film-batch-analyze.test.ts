@@ -4,8 +4,8 @@ import {
   buildBatchAnalyzeTargets,
   formatBatchSummaryLine,
   summarizeBatchAnalysis,
-} from "../../src/lib/film-room/film-batch-analyze.ts";
-import { createFilmBookmark } from "../../src/lib/film-room/film-room-bookmarks.ts";
+} from "../../src/features/film-room/lib/film-batch-analyze.ts";
+import { createFilmBookmark } from "../../src/features/film-room/lib/film-room-bookmarks.ts";
 
 describe("film-batch-analyze", () => {
   it("builds disruption targets from bookmarks and tags", () => {

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { applyActionResultsToFrame, objectsAfterFrameActions } from "@/lib/designer/frame-propagation";
-import { resolvePassStartPlayer, snapPassEndpoints } from "@/lib/designer/player-edge-snap";
+import { applyActionResultsToFrame, objectsAfterFrameActions } from "@/features/designer/lib/frame-propagation";
+import { resolvePassStartPlayer, snapPassEndpoints } from "@/features/designer/lib/player-edge-snap";
 import {
   ballHolderLabel,
   ballHolderLabels,

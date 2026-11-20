@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
-import { rankCoachAlternativePlays } from "../../src/lib/designer/designer-coach-alternatives";
-import type { GamePlan, PlaybookSection } from "../../src/types/library-meta";
-import type { StoredPlay } from "../../src/types/library";
+import { rankCoachAlternativePlays } from "../../src/features/designer/lib/designer-coach-alternatives";
+import type { GamePlan, PlaybookSection } from "../../src/features/library/model/library-meta";
+import type { StoredPlay } from "../../src/features/library/model/library";
 
 function baseFrame() {
   return {

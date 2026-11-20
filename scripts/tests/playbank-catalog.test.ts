@@ -5,7 +5,7 @@ import {
   isPlaybankLibraryId,
   playbankEntryToStoredPlay,
   playbankLibraryId,
-} from "../../src/lib/playbank/catalog.ts";
+} from "../../src/features/playbank/lib/catalog.ts";
 
 describe("PlayBank catalog", () => {
   it("ships named starter sets", () => {

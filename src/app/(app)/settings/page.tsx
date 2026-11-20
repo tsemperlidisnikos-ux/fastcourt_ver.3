@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAuthStore } from "@/stores/auth-store";
-import { useLibraryStore } from "@/stores/library-store";
-import { useSettingsStore } from "@/stores/settings-store";
-import { isAdminUser, isTeamAdminUser } from "@/lib/auth/roles";
-import { AdminSettingsPanel } from "@/components/settings/AdminSettingsPanel";
-import { CoachSettingsPanel } from "@/components/settings/CoachSettingsPanel";
-import { TeamAdminSettingsPanel } from "@/components/settings/TeamAdminSettingsPanel";
+import { useAuthStore } from "@/features/auth/model/auth-store";
+import { useLibraryStore } from "@/features/library/model/library-store";
+import { useSettingsStore } from "@/features/settings/model/settings-store";
+import { isAdminUser, isTeamAdminUser } from "@/features/auth/lib/roles";
+import { AdminSettingsPanel } from "@/features/settings/ui/AdminSettingsPanel";
+import { CoachSettingsPanel } from "@/features/settings/ui/CoachSettingsPanel";
+import { TeamAdminSettingsPanel } from "@/features/settings/ui/TeamAdminSettingsPanel";
 
 export default function SettingsPage() {
   const session = useAuthStore((s) => s.session);

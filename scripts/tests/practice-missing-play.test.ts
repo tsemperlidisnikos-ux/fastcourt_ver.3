@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { isPracticeItemMissing } from "../../src/lib/practice/practice-items";
+import { isPracticeItemMissing } from "../../src/features/practice/lib/practice-items";
 
 const missing = isPracticeItemMissing({
   item: {

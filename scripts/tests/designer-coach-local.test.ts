@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
-import { analyzePlayLocally } from "../../src/lib/designer/analyze-play-locally";
-import { applyFixesToFrame } from "../../src/lib/designer/designer-coach-apply";
-import type { StoredPlay } from "../../src/types/library";
+import { analyzePlayLocally } from "../../src/features/designer/lib/analyze-play-locally";
+import { applyFixesToFrame } from "../../src/features/designer/lib/designer-coach-apply";
+import type { StoredPlay } from "../../src/features/library/model/library";
 function makePlay(overrides: Partial<StoredPlay> = {}): StoredPlay {
   return {
     id: "play-test",

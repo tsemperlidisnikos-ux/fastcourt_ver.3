@@ -1,9 +1,9 @@
 @import "tailwindcss";
-@import "../styles/overflow-menus.css";
-@import "../styles/fc-laptop-lock.css";
-@import "../styles/fc-pwa.css";
+@import "../shared/styles/overflow-menus.css";
+@import "../shared/styles/fc-laptop-lock.css";
+@import "../shared/styles/fc-pwa.css";
 
-@import "../styles/fc-primary-actions.css";
+@import "../shared/styles/fc-primary-actions.css";
 
 @font-face {
   font-family: "Puck Bold";

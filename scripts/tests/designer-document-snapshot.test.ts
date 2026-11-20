@@ -3,8 +3,8 @@ import { describe, it } from "node:test";
 import {
   designerDocumentsEqual,
   serializeDesignerDocument,
-} from "../../src/lib/designer/designer-document-snapshot.ts";
-import type { StoredPlay } from "../../src/types/library.ts";
+} from "../../src/features/designer/lib/designer-document-snapshot.ts";
+import type { StoredPlay } from "../../src/features/library/model/library.ts";
 
 function samplePlay(overrides: Partial<StoredPlay> = {}): StoredPlay {
   return {
