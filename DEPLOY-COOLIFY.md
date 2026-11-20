@@ -2,11 +2,14 @@
 
 ## Recommended setup
 
-- **Build Pack:** Dockerfile  
-- **Dockerfile:** `./Dockerfile`  
-- **Port:** `3000` (Coolify maps it; `server.js` also reads `PORT`)  
-- **Start command:** leave empty (image `CMD` is `node server.js`)  
+- **Build Pack:** Dockerfile (not Docker Compose)
+- **Dockerfile:** `./Dockerfile`
+- **Port:** `3000` (Coolify maps it; `server.js` also reads `PORT`)
+- **Start command:** leave empty (image `CMD` is `node server.js`)
 - **Health check path:** `/api/health`
+
+If Coolify auto-detects Compose, switch the resource to **Dockerfile** build pack.
+Local compose file is `docker-compose.local.yml` (not used by Coolify).
 
 Practice Live WebSocket uses the **same port**: `wss://YOUR_DOMAIN/practice-live`.
 
@@ -62,8 +65,8 @@ If you prefer Nixpacks instead of Dockerfile:
 
 ```bash
 cd C:\fastcourt_ver.3
-docker compose build
-docker compose up
+docker compose -f docker-compose.local.yml build
+docker compose -f docker-compose.local.yml up
 ```
 
 Open http://localhost:3000
