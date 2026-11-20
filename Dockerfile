@@ -15,7 +15,8 @@ ENV ELECTRON_SKIP_BINARY_DOWNLOAD=1 \
     npm_config_audit=false
 
 COPY package.json package-lock.json ./
-RUN npm ci
+# postinstall needs these scripts; defer it until the builder has full source
+RUN npm ci --ignore-scripts
 
 FROM node:22-bookworm-slim AS builder
 WORKDIR /app
@@ -46,7 +47,7 @@ ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL \
     NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
     NEXT_PUBLIC_LIVE_WS_URL=$NEXT_PUBLIC_LIVE_WS_URL
 
-RUN npm run build
+RUN npm run postinstall && npm run build
 
 FROM node:22-bookworm-slim AS runner
 WORKDIR /app
